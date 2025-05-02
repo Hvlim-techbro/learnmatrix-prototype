@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 354 100% 71%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+  
+  /* Custom accent colors */
+  --accent-purple: 267 100% 68%;
+  --accent-green: 158 94% 52%;
+  --accent-yellow: 38 93% 55%;
+  --accent-blue: 198 93% 60%;
+  
+  /* Custom theme colors */
+  --neutral-lightest: 210 50% 98%;
+  --neutral-light: 210 40% 96%;
+  --neutral: 210 20% 90%;
+  --neutral-dark: 215 20% 65%;
+  --neutral-darker: 215 25% 35%;
+  --neutral-darkest: 215 28% 17%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 354 100% 71%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 1rem;
+  
+  /* Custom accent colors in dark mode */
+  --accent-purple: 267 90% 68%;
+  --accent-green: 158 84% 52%;
+  --accent-yellow: 38 83% 55%;
+  --accent-blue: 198 83% 60%;
+  
+  /* Custom theme colors in dark mode */
+  --neutral-lightest: 215 28% 7%;
+  --neutral-light: 215 25% 12%;
+  --neutral: 215 20% 20%;
+  --neutral-dark: 215 20% 35%;
+  --neutral-darker: 215 15% 65%;
+  --neutral-darkest: 210 40% 93%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-neutral-lightest text-neutral-darkest;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+  
+  /* Custom utility classes */
+  .bg-accent-purple {
+    @apply bg-[hsl(var(--accent-purple))];
+  }
+  
+  .bg-accent-green {
+    @apply bg-[hsl(var(--accent-green))];
+  }
+  
+  .bg-accent-yellow {
+    @apply bg-[hsl(var(--accent-yellow))];
+  }
+  
+  .bg-accent-blue {
+    @apply bg-[hsl(var(--accent-blue))];
+  }
+  
+  .text-accent-purple {
+    @apply text-[hsl(var(--accent-purple))];
+  }
+  
+  .text-accent-green {
+    @apply text-[hsl(var(--accent-green))];
+  }
+  
+  .text-accent-yellow {
+    @apply text-[hsl(var(--accent-yellow))];
+  }
+  
+  .text-accent-blue {
+    @apply text-[hsl(var(--accent-blue))];
+  }
+  
+  .text-neutral-darker {
+    @apply text-[hsl(var(--neutral-darker))];
+  }
+  
+  .bg-neutral-light {
+    @apply bg-[hsl(var(--neutral-light))];
+  }
+  
+  /* Custom animations */
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out forwards;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
