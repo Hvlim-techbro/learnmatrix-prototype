@@ -38,7 +38,7 @@ export default function ModuleCard({
   return (
     <Link href={path}>
       <motion.div 
-        className="bg-[#111] border border-[#222] rounded-xl p-5 h-[180px] flex flex-col justify-between cursor-pointer relative group overflow-hidden"
+        className="bg-[#1E1E1E] border border-[#333] rounded-xl p-5 h-[180px] flex flex-col justify-between cursor-pointer relative group overflow-hidden"
         whileHover={{ y: -5, scale: 1.02 }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       >

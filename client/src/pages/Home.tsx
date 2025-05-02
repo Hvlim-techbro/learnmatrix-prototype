@@ -65,7 +65,7 @@ export default function Home() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-black">
       {/* Guided Tour */}
       <GuidedTour isOpen={showTour} onClose={() => setShowTour(false)} />
       

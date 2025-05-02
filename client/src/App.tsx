@@ -62,7 +62,7 @@ function Router() {
   // }
 
   return (
-    <div className={`min-h-screen flex flex-col ${showHeaderAndTabs ? 'bg-gradient-to-b from-neutral-lightest to-neutral-light' : 'bg-black'} relative`}>
+    <div className="min-h-screen flex flex-col bg-black relative">
       {showHeaderAndTabs && (
         <>
           {/* Abstract background patterns */}

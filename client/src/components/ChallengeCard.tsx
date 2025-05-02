@@ -73,7 +73,7 @@ export default function ChallengeCard({ challenge }: ChallengeCardProps) {
   
   return (
     <motion.div 
-      className="bg-[#111] border border-[#222] rounded-xl p-4 shadow-md relative overflow-hidden group"
+      className="bg-[#1E1E1E] border border-[#333] rounded-xl p-4 shadow-md relative overflow-hidden group"
       whileHover={{ y: -5, scale: 1.02 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     >
@@ -148,7 +148,7 @@ export default function ChallengeCard({ challenge }: ChallengeCardProps) {
             isCompleted 
               ? 'bg-gradient-green text-white' 
               : challenge.progress > 0 
-                ? 'bg-[#222] text-[#888] hover:bg-[#333]' 
+                ? 'bg-[#333] text-[#aaa] hover:bg-[#444]' 
                 : `${gradient} text-white`
           )}
           onClick={handleStartChallenge}
