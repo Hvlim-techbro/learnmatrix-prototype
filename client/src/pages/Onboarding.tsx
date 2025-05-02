@@ -55,38 +55,115 @@ export default function Onboarding() {
     exit: { opacity: 0, x: -100 }
   };
   
+  // Map color codes to their corresponding gradients
+  const getGradientClass = (color: string) => {
+    switch(color) {
+      case 'text-primary': return 'bg-gradient-primary';
+      case 'text-secondary': return 'bg-gradient-secondary';
+      case 'text-accent-blue': return 'bg-gradient-blue';
+      case 'text-accent-purple': return 'bg-gradient-purple';
+      case 'text-accent-green': return 'bg-gradient-green';
+      case 'text-accent-yellow': return 'bg-gradient-yellow';
+      default: return 'bg-gradient-primary';
+    }
+  };
+
   return (
-    <div className="h-screen w-full">
+    <div className="min-h-screen w-full bg-black">
       <AnimatePresence mode="wait">
         <motion.div 
           key={currentSlide}
-          className="h-full flex flex-col items-center justify-center p-8 text-center"
+          className="min-h-screen flex flex-col items-center justify-center p-8 text-center"
           initial="enter"
           animate="center"
           exit="exit"
           variants={slideVariants}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.5, type: 'spring', stiffness: 300, damping: 30 }}
         >
-          <div className={`mb-12 ${slides[currentSlide].color}`}>
-            {slides[currentSlide].icon}
-          </div>
-          <h1 className="text-3xl font-bold mb-4">{slides[currentSlide].title}</h1>
-          <p className="text-lg text-neutral-darker mb-8">{slides[currentSlide].description}</p>
-          <Button
-            className="bg-primary text-white rounded-full py-3 px-8 font-semibold"
-            onClick={handleNext}
+          <motion.div 
+            className={`mb-12 p-8 rounded-full ${slides[currentSlide].color}`}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
-            {currentSlide === slides.length - 1 ? "Let's Get Started!" : "Next"}
-          </Button>
+            <motion.div
+              animate={{ 
+                rotateZ: [0, 10, 0, -10, 0],
+                scale: [1, 1.1, 1, 1.1, 1]
+              }}
+              transition={{ 
+                duration: 5, 
+                ease: "easeInOut", 
+                repeat: Infinity
+              }}
+            >
+              {slides[currentSlide].icon}
+            </motion.div>
+          </motion.div>
           
-          {/* Pagination dots */}
-          <div className="flex space-x-2 mt-12">
-            {slides.map((_, index) => (
-              <div 
-                key={index}
-                className={`w-2.5 h-2.5 rounded-full ${currentSlide === index ? 'bg-primary' : 'bg-neutral'}`}
-              />
-            ))}
+          <motion.h1 
+            className="text-4xl font-bold mb-6 text-white"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            {slides[currentSlide].title}
+          </motion.h1>
+          
+          <motion.p 
+            className="text-lg text-[#aaa] mb-10 max-w-md"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            {slides[currentSlide].description}
+          </motion.p>
+          
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
+            <Button
+              className={`${getGradientClass(slides[currentSlide].color)} text-white rounded-full py-6 px-10 font-semibold text-lg shadow-xl hover:shadow-2xl transition-shadow`}
+              onClick={handleNext}
+              style={{ width: '200px' }}
+            >
+              {currentSlide === slides.length - 1 ? "Let's Start!" : "Next"}
+            </Button>
+          </motion.div>
+          
+          {/* Fancy pagination */}
+          <div className="flex space-x-3 mt-16">
+            {slides.map((slide, index) => {
+              const isActive = currentSlide === index;
+              const dotColor = getGradientClass(slide.color);
+              
+              return (
+                <motion.div 
+                  key={index}
+                  className={`w-3 h-3 rounded-full cursor-pointer ${isActive ? dotColor : 'bg-[#222]'}`}
+                  whileHover={{ scale: 1.5 }}
+                  animate={isActive ? { scale: [1, 1.2, 1], opacity: 1 } : { opacity: 0.5 }}
+                  transition={{ duration: 0.5 }}
+                  onClick={() => setCurrentSlide(index)}
+                />
+              );
+            })}
+          </div>
+          
+          {/* Background decorations */}
+          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+            <motion.div 
+              className={`absolute -top-20 -right-20 w-64 h-64 rounded-full ${getGradientClass(slides[currentSlide].color)} opacity-5 blur-3xl`}
+              animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }}
+              transition={{ duration: 8, repeat: Infinity }}
+            />
+            <motion.div 
+              className={`absolute -bottom-10 -left-10 w-40 h-40 rounded-full ${getGradientClass(slides[currentSlide].color)} opacity-5 blur-3xl`}
+              animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.1, 0.05] }}
+              transition={{ duration: 6, repeat: Infinity, delay: 1 }}
+            />
           </div>
         </motion.div>
       </AnimatePresence>

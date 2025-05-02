@@ -27,37 +27,70 @@ export default function QuizBattle() {
   const rank = getQuizRank(battleStats.won);
   
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">Quiz Battle Arena</h2>
-        <p className="text-neutral-darker">Test your knowledge against others</p>
-      </div>
+    <div className="p-6 bg-black min-h-[calc(100vh-8rem)]">
+      <motion.div 
+        className="mb-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <h2 className="text-2xl font-bold mb-2 text-white">Quiz Battle Arena</h2>
+        <p className="text-[#888]">Test your knowledge against others</p>
+      </motion.div>
       
       {/* Battle Stats */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-white rounded-2xl p-5 shadow-sm border border-neutral mb-6"
+        className="bg-[#111] rounded-xl p-6 shadow-md border border-[#222] mb-6 relative overflow-hidden"
+        whileHover={{ borderColor: '#333', boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}
       >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold">Your Battle Stats</h3>
-          <span className="bg-accent-yellow text-white rounded-full px-3 py-1 text-xs font-medium">Rank: {rank}</span>
+        {/* Background decoration */}
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-yellow opacity-5 rounded-full blur-xl"></div>
+        
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-5 relative z-10">
+          <h3 className="font-semibold text-white mb-2 sm:mb-0">Your Battle Stats</h3>
+          <motion.span 
+            className="bg-gradient-yellow text-white rounded-full px-4 py-1.5 text-xs font-medium shadow-md self-start sm:self-auto"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            Rank: {rank}
+          </motion.span>
         </div>
         
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold text-primary">{battleStats.won}</div>
-            <div className="text-xs text-neutral-darker">Battles Won</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-primary">{battleStats.lost}</div>
-            <div className="text-xs text-neutral-darker">Battles Lost</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-primary">{battleStats.winRate}</div>
-            <div className="text-xs text-neutral-darker">Win Rate</div>
-          </div>
+        <div className="grid grid-cols-3 gap-4 text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            whileHover={{ y: -5 }}
+          >
+            <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-yellow mb-1">{battleStats.won}</div>
+            <div className="text-xs text-[#888]">Battles Won</div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            whileHover={{ y: -5 }}
+          >
+            <div className="text-3xl font-bold text-[#aaa] mb-1">{battleStats.lost}</div>
+            <div className="text-xs text-[#888]">Battles Lost</div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            whileHover={{ y: -5 }}
+          >
+            <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-primary mb-1">{battleStats.winRate}</div>
+            <div className="text-xs text-[#888]">Win Rate</div>
+          </motion.div>
         </div>
       </motion.div>
       
@@ -66,62 +99,96 @@ export default function QuizBattle() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="space-y-4 mb-6"
+        className="space-y-4 mb-8"
       >
-        <button className="bg-secondary w-full text-white rounded-xl py-4 font-semibold flex items-center justify-center">
-          <Zap className="h-5 w-5 mr-2" /> Quick Match
-        </button>
+        <motion.button 
+          className="bg-gradient-yellow w-full text-white rounded-xl py-4 font-semibold flex items-center justify-center shadow-lg"
+          whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(234, 179, 8, 0.3)' }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Zap className="h-5 w-5 mr-3" /> Quick Match
+        </motion.button>
         
-        <button className="bg-primary w-full text-white rounded-xl py-4 font-semibold flex items-center justify-center">
-          <Trophy className="h-5 w-5 mr-2" /> Ranked Match
-        </button>
+        <motion.button 
+          className="bg-gradient-primary w-full text-white rounded-xl py-4 font-semibold flex items-center justify-center shadow-lg"
+          whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(124, 58, 237, 0.3)' }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Trophy className="h-5 w-5 mr-3" /> Ranked Match
+        </motion.button>
         
-        <button className="bg-white w-full text-neutral-darker border border-neutral rounded-xl py-4 font-semibold flex items-center justify-center">
-          <Users className="h-5 w-5 mr-2" /> Challenge Cohort
-        </button>
+        <motion.button 
+          className="bg-[#161616] w-full text-white border border-[#333] rounded-xl py-4 font-semibold flex items-center justify-center"
+          whileHover={{ scale: 1.02, backgroundColor: '#222', borderColor: '#444' }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Users className="h-5 w-5 mr-3" /> Challenge Cohort
+        </motion.button>
       </motion.div>
       
       {/* Leaderboard Preview */}
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold">Leaderboard</h3>
-          <a href="#" className="text-sm text-primary">See Full</a>
+          <h3 className="font-semibold text-white">Leaderboard</h3>
+          <motion.a 
+            href="#" 
+            className="text-sm text-primary hover:text-primary/80 transition-colors"
+            whileHover={{ x: 3 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            See Full
+          </motion.a>
         </div>
         
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-sm border border-neutral overflow-hidden"
+          className="bg-[#111] rounded-xl shadow-md border border-[#222] overflow-hidden"
+          whileHover={{ borderColor: '#333' }}
         >
-          <div className="p-4 border-b border-neutral flex items-center">
-            <div className="w-8 text-center font-medium text-neutral-darker">#</div>
-            <div className="flex-1 font-medium">Player</div>
-            <div className="w-16 text-center font-medium">Wins</div>
+          <div className="p-4 border-b border-[#222] flex items-center">
+            <div className="w-8 text-center font-medium text-[#888]">#</div>
+            <div className="flex-1 font-medium text-white">Player</div>
+            <div className="w-16 text-center font-medium text-[#888]">Wins</div>
           </div>
           
-          <div className="divide-y divide-neutral">
+          <div className="divide-y divide-[#222]">
             {leaderboard.map((player, index) => (
               <motion.div 
                 key={player.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
-                className={`p-4 flex items-center ${player.isCurrentUser ? 'bg-primary-light bg-opacity-10' : ''}`}
+                className={`p-4 flex items-center ${player.isCurrentUser ? 'bg-[#181818]' : ''}`}
+                whileHover={{ backgroundColor: player.isCurrentUser ? '#181818' : '#161616' }}
               >
-                <div className="w-8 text-center font-bold">{index + 1}</div>
+                <div className="w-8 text-center font-bold text-white">{index + 1}</div>
                 <div className="flex-1 flex items-center">
-                  <div className={`w-8 h-8 rounded-full bg-${player.color} text-white flex items-center justify-center text-xs mr-2`}>
+                  <motion.div 
+                    className={`w-10 h-10 rounded-full ${player.color === 'primary' ? 'bg-gradient-primary' : 
+                      player.color === 'accent-purple' ? 'bg-gradient-purple' : 
+                      player.color === 'accent-green' ? 'bg-gradient-green' : 
+                      player.color === 'accent-blue' ? 'bg-gradient-blue' : 
+                      'bg-gradient-primary'} 
+                      text-white flex items-center justify-center text-xs font-medium mr-3 shadow-md`}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
                     {player.initials}
-                  </div>
-                  <span>{player.name}</span>
+                  </motion.div>
+                  <span className="text-white">{player.name}</span>
                 </div>
-                <div className="w-16 text-center font-bold">{player.wins}</div>
+                <div className="w-16 text-center font-bold text-white">{player.wins}</div>
               </motion.div>
             ))}
           </div>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 }
