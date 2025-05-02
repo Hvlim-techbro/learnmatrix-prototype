@@ -12,12 +12,11 @@ export default function TabBar() {
     { name: 'Visual', path: '/visual-tutor', icon: Presentation },
     { name: 'Quiz', path: '/quiz-battle', icon: Trophy },
     { name: 'Cohort', path: '/cohort', icon: Users },
-    { name: 'Rewards', path: '/rewards', icon: ShoppingBag },
   ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-[#333] z-50">
-      <div className="grid grid-cols-6 h-16">
+      <div className="grid grid-cols-5 h-16">
         {tabs.map((tab, index) => {
           const isActive = tab.path === location;
           

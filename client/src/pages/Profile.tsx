@@ -42,6 +42,8 @@ export default function Profile() {
   
   return (
     <div className="p-6 bg-black min-h-[calc(100vh-8rem)]">
+      {/* Profile background effect */}
+      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#1E1E1E] to-transparent opacity-50 -z-10"></div>
       <motion.div 
         className="mb-6"
         initial={{ opacity: 0, y: 20 }}
@@ -57,7 +59,7 @@ export default function Profile() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-[#111] rounded-xl p-6 shadow-md border border-[#333] mb-6 text-center"
+        className="bg-[#1E1E1E] rounded-xl p-6 shadow-md border border-[#333] mb-6 text-center"
         whileHover={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}
       >
         <motion.div 
@@ -101,7 +103,7 @@ export default function Profile() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3, delay: 0.1 + index * 0.1 }}
-              className="bg-[#111] rounded-xl p-5 shadow-md border border-[#222] text-center"
+              className="bg-[#1E1E1E] rounded-xl p-5 shadow-md border border-[#333] text-center"
               whileHover={{ y: -5, borderColor: '#333', backgroundColor: '#161616' }}
               whileTap={{ scale: 0.98 }}
             >
@@ -144,7 +146,7 @@ export default function Profile() {
           </motion.a>
         </div>
         <motion.div 
-          className="bg-[#111] rounded-xl p-6 shadow-md border border-[#222]"
+          className="bg-[#1E1E1E] rounded-xl p-6 shadow-md border border-[#333]"
           whileHover={{ borderColor: '#333' }}
         >
           <div className="flex flex-wrap gap-6 justify-center md:justify-start">
@@ -164,7 +166,7 @@ export default function Profile() {
               whileTap={{ scale: 0.95 }}
             >
               <motion.div 
-                className="w-16 h-16 rounded-full bg-[#222] text-[#888] flex items-center justify-center text-lg mb-2 cursor-pointer hover:bg-[#333] hover:text-white transition-colors"
+                className="w-16 h-16 rounded-full bg-[#333] text-[#aaa] flex items-center justify-center text-lg mb-2 cursor-pointer hover:bg-[#444] hover:text-white transition-colors"
                 whileHover={{ rotate: 90 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 10 }}
               >
@@ -182,10 +184,17 @@ export default function Profile() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.3 }}
       >
-        <h3 className="font-semibold mb-4 text-white">Reward Shop</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-semibold text-white">Reward Shop</h3>
+          <div className="flex items-center text-xs text-[#aaa] bg-[#333] rounded-lg px-3 py-1">
+            <span className="font-medium text-transparent bg-clip-text bg-gradient-primary">{user?.xp || 1250} XP</span>
+            <span className="ml-1">available</span>
+          </div>
+        </div>
         <motion.div 
-          className="bg-[#111] rounded-xl p-6 shadow-md border border-[#222] overflow-hidden relative"
-          whileHover={{ borderColor: '#333' }}
+          className="bg-[#1E1E1E] rounded-xl p-6 shadow-md border border-[#333] overflow-hidden relative hover:shadow-lg transition-all duration-300"
+          whileHover={{ borderColor: '#29B6F6', scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         >
           {/* Decorative background elements */}
           <div className="absolute -top-12 -right-12 w-32 h-32 bg-gradient-secondary opacity-10 rounded-full blur-xl"></div>
@@ -199,12 +208,12 @@ export default function Profile() {
               </div>
             </div>
             <motion.button 
-              className="bg-gradient-primary text-white rounded-lg px-5 py-2.5 text-sm font-medium shadow-lg"
+              className="bg-[#29B6F6] hover:bg-[#29B6F6]/90 text-white rounded-lg px-5 py-3 text-sm font-medium shadow-lg"
               onClick={handleVisitShop}
-              whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(124, 58, 237, 0.5)' }}
+              whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(41, 182, 246, 0.5)' }}
               whileTap={{ scale: 0.95 }}
             >
-              Visit Shop
+              Visit Reward Shop
             </motion.button>
           </div>
           
