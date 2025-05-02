@@ -70,10 +70,19 @@ export class MemStorage implements IStorage {
     this.lessonId = 1;
     
     // Initialize with default data
-    this.initDefaultData();
+    this.initDefaultData().catch(console.error);
   }
   
-  private initDefaultData() {
+  private async initDefaultData() {
+    // Create default user
+    this.createUser({
+      username: "jordan",
+      password: "password123", // In a real app, this would be hashed
+      displayName: "Jordan Lee",
+      avatarInitials: "JL",
+      avatarColor: "accent-blue"
+    });
+    
     // Create modules
     const moduleData: InsertModule[] = [
       { name: "AI Audio Tutor", description: "Learn with podcast-style lessons", icon: "microphone-alt", color: "accent-blue" },
@@ -93,6 +102,9 @@ export class MemStorage implements IStorage {
       tier: "Scholar Circle"
     });
     
+    // Add user to cohort
+    this.addUserToCohort(1, 1);
+    
     // Create some default challenges
     this.createChallenge({
       title: "Complete 1 quiz battle",
@@ -104,15 +116,35 @@ export class MemStorage implements IStorage {
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
     });
     
-    this.createChallenge({
+    // Create challenge with initial progress
+    const highlightChallenge = await this.createChallenge({
       title: "Highlight a concept in Visual Tutor",
       description: "Find and highlight key concepts",
       type: "daily",
       xpReward: 10,
       target: 3,
-      progress: 2,
       userId: 1,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+    });
+    
+    // Update progress for this challenge
+    await this.updateChallengeProgress(highlightChallenge.id, 2);
+    
+    // Create some badges for user
+    this.createBadge({
+      name: "Streak Keeper",
+      description: "7-day learning streak",
+      icon: "fire",
+      color: "accent-yellow",
+      userId: 1
+    });
+    
+    this.createBadge({
+      name: "Fast Learner",
+      description: "Top 5% of cohort in lesson completion speed",
+      icon: "zap",
+      color: "accent-blue",
+      userId: 1
     });
     
     // Create lessons for audio tutor
@@ -124,6 +156,12 @@ export class MemStorage implements IStorage {
     ];
     
     audioTutorLessons.forEach(lesson => this.createLesson(lesson));
+    
+    // Mark first lesson as completed
+    this.markLessonCompleted(1, 1);
+    
+    // Update user XP to have some initial progress
+    this.updateUserXp(1, 250);
   }
 
   // User operations
@@ -146,7 +184,10 @@ export class MemStorage implements IStorage {
       level: 1, 
       tier: "Novice Nexus",
       streak: 0,
-      lastActive: new Date()
+      lastActive: new Date(),
+      avatarInitials: insertUser.avatarInitials || "",
+      avatarColor: insertUser.avatarColor || "primary",
+      cohortId: null
     };
     this.users.set(id, user);
     return user;
@@ -178,7 +219,12 @@ export class MemStorage implements IStorage {
 
   async createCohort(insertCohort: InsertCohort): Promise<Cohort> {
     const id = this.cohortId++;
-    const cohort: Cohort = { ...insertCohort, id, memberCount: 0 };
+    const cohort: Cohort = { 
+      ...insertCohort, 
+      id, 
+      memberCount: 0,
+      tier: insertCohort.tier || "Novice Nexus" 
+    };
     this.cohorts.set(id, cohort);
     return cohort;
   }
@@ -210,7 +256,10 @@ export class MemStorage implements IStorage {
     const challenge: Challenge = { 
       ...insertChallenge, 
       id, 
-      progress: insertChallenge.progress || 0
+      progress: 0,
+      userId: insertChallenge.userId || null,
+      badgeReward: insertChallenge.badgeReward || null,
+      expiresAt: insertChallenge.expiresAt || null
     };
     this.challenges.set(id, challenge);
     return challenge;
@@ -234,7 +283,11 @@ export class MemStorage implements IStorage {
 
   async createBadge(insertBadge: InsertBadge): Promise<Badge> {
     const id = this.badgeId++;
-    const badge: Badge = { ...insertBadge, id };
+    const badge: Badge = { 
+      ...insertBadge, 
+      id,
+      userId: insertBadge.userId || null 
+    };
     this.badges.set(id, badge);
     return badge;
   }
@@ -260,7 +313,13 @@ export class MemStorage implements IStorage {
 
   async createLesson(insertLesson: InsertLesson): Promise<Lesson> {
     const id = this.lessonId++;
-    const lesson: Lesson = { ...insertLesson, id, completed: false };
+    const lesson: Lesson = { 
+      ...insertLesson, 
+      id, 
+      completed: false,
+      userId: insertLesson.userId || null,
+      moduleId: insertLesson.moduleId || null
+    };
     this.lessons.set(id, lesson);
     return lesson;
   }
