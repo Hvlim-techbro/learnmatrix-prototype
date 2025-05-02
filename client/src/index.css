@@ -3,74 +3,81 @@
 @tailwind utilities;
 
 :root {
-  /* Main color palette - clean black and white theme with blue accents */
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
+  /* Main color palette - Dark mode by default */
+  --background: 220 10% 7%; /* Dark blue-gray background */
+  --foreground: 210 40% 98%;
+  --muted: 217 10% 12%;
+  --muted-foreground: 215 20% 65%;
+  --popover: 220 10% 5%;
+  --popover-foreground: 210 40% 98%;
+  --card: 220 13% 10%;
+  --card-foreground: 210 40% 98%;
+  --border: 216 12% 17%;
+  --input: 216 12% 17%;
   
-  /* Primary - deep blue */
-  --primary: 220 70% 50%;
+  /* Vibrant primary - blue */
+  --primary: 213 90% 50%;
   --primary-foreground: 0 0% 100%;
   
-  /* Secondary - vibrant accent for highlights */
-  --secondary: 262 83% 58%;
+  /* Vibrant secondary - purple */
+  --secondary: 263 83% 58%;
   --secondary-foreground: 0 0% 100%;
   
   /* Other functional colors */
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
-  --destructive: 0 84.2% 60.2%;
+  --accent: 224 30% 15%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --ring: 240 5% 64.9%;
+  --ring: 213 90% 50%;
   --radius: 0.75rem;
   
-  /* Common accent colors - all using the same saturation/lightness for consistency */
-  --accent-blue: 220 70% 50%; /* Matches primary */
-  --accent-purple: 262 83% 58%; /* Matches secondary */
-  --accent-green: 142 70% 45%; 
-  --accent-yellow: 35 85% 55%;
+  /* Vibrant accent colors */
+  --accent-blue: 213 90% 50%;
+  --accent-purple: 263 83% 58%;
+  --accent-green: 142 70% 50%;
+  --accent-yellow: 35 90% 60%;
   --accent-orange: 20 90% 59%;
-  --accent-red: 0 84% 60%; /* Matches destructive */
+  --accent-red: 0 84% 60%;
   
-  /* Neutral shades - consistent palette */
-  --neutral-lightest: 240 5% 98%;
-  --neutral-light: 240 5% 95%;
-  --neutral: 240 5% 90%;
-  --neutral-dark: 240 5% 65%;
-  --neutral-darker: 240 5% 35%;
-  --neutral-darkest: 240 5% 10%;
+  /* Neutral shades */
+  --neutral-lightest: 217 8% 25%;
+  --neutral-light: 217 8% 20%;
+  --neutral: 217 8% 15%;
+  --neutral-dark: 217 8% 12%;
+  --neutral-darker: 217 10% 10%;
+  --neutral-darkest: 220 10% 7%;
   
-  /* Gradients - consistent color transitions */
-  --gradient-primary: linear-gradient(135deg, hsl(220, 70%, 50%) 0%, hsl(230, 70%, 60%) 100%);
-  --gradient-secondary: linear-gradient(135deg, hsl(262, 83%, 58%) 0%, hsl(272, 83%, 68%) 100%);
-  --gradient-purple: linear-gradient(135deg, hsl(262, 83%, 58%) 0%, hsl(272, 83%, 68%) 100%);
-  --gradient-green: linear-gradient(135deg, hsl(142, 70%, 45%) 0%, hsl(152, 70%, 55%) 100%);
-  --gradient-yellow: linear-gradient(135deg, hsl(35, 85%, 55%) 0%, hsl(45, 85%, 65%) 100%);
-  --gradient-blue: linear-gradient(135deg, hsl(220, 70%, 50%) 0%, hsl(210, 70%, 60%) 100%);
+  /* Gradients - vibrant color transitions */
+  --gradient-primary: linear-gradient(135deg, hsl(213, 90%, 50%) 0%, hsl(223, 90%, 60%) 100%);
+  --gradient-secondary: linear-gradient(135deg, hsl(263, 83%, 58%) 0%, hsl(273, 90%, 68%) 100%);
+  --gradient-purple: linear-gradient(135deg, hsl(263, 83%, 58%) 0%, hsl(273, 90%, 68%) 100%);
+  --gradient-green: linear-gradient(135deg, hsl(142, 70%, 50%) 0%, hsl(152, 70%, 65%) 100%);
+  --gradient-yellow: linear-gradient(135deg, hsl(35, 90%, 60%) 0%, hsl(45, 90%, 70%) 100%);
+  --gradient-blue: linear-gradient(135deg, hsl(213, 90%, 50%) 0%, hsl(193, 90%, 60%) 100%);
   --gradient-red: linear-gradient(135deg, hsl(0, 84%, 60%) 0%, hsl(10, 84%, 70%) 100%);
-  --gradient-dark: linear-gradient(135deg, hsl(240, 10%, 10%) 0%, hsl(240, 10%, 20%) 100%);
+  --gradient-dark: linear-gradient(135deg, hsl(220, 10%, 10%) 0%, hsl(220, 10%, 15%) 100%);
   
-  /* Shadows - subtle and consistent */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.12);
+  /* Shadows - enhanced for dark mode */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 12px 28px rgba(0, 0, 0, 0.7);
+  
+  /* Glows */
+  --glow-primary: 0 0 15px rgba(59, 130, 246, 0.5);
+  --glow-secondary: 0 0 15px rgba(168, 85, 247, 0.5);
+  --glow-green: 0 0 15px rgba(34, 197, 94, 0.5);
+  --glow-yellow: 0 0 15px rgba(250, 204, 21, 0.5);
+  --glow-red: 0 0 15px rgba(239, 68, 68, 0.5);
   
   /* Blurs */
   --blur-sm: blur(4px);
   --blur-md: blur(8px);
   --blur-lg: blur(16px);
   
-  /* Glass morphism - consistent transparency */
-  --glass-background: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(255, 255, 255, 0.25);
+  /* Glass morphism - dark mode */
+  --glass-background: rgba(31, 35, 45, 0.7);
+  --glass-border: rgba(59, 130, 246, 0.25);
 }
 
 .dark {
@@ -116,7 +123,28 @@
   }
 
   body {
-    @apply font-sans antialiased bg-neutral-lightest text-neutral-darkest;
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+  
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+  
+  .glow-secondary {
+    box-shadow: var(--glow-secondary);
+  }
+  
+  .glow-green {
+    box-shadow: var(--glow-green);
+  }
+  
+  .glow-yellow {
+    box-shadow: var(--glow-yellow);
+  }
+  
+  .glow-red {
+    box-shadow: var(--glow-red);
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -236,8 +264,24 @@
     animation: slideUp 0.3s ease-out forwards;
   }
   
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out forwards;
+  }
+  
+  .animate-slide-left {
+    animation: slideLeft 0.3s ease-out forwards;
+  }
+  
+  .animate-slide-right {
+    animation: slideRight 0.3s ease-out forwards;
+  }
+  
   .animate-fade-in {
     animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .animate-fade-in-scale {
+    animation: fadeInScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   
   .animate-pulse-custom {
@@ -250,6 +294,14 @@
   
   .animate-bounce-subtle {
     animation: bounceSlight 2s ease-in-out infinite;
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+  
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
   }
   
   @keyframes slideUp {
@@ -290,6 +342,68 @@
     }
     100% {
       transform: translateY(0px);
+    }
+  }
+  
+  @keyframes slideDown {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideLeft {
+    from {
+      transform: translateX(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideRight {
+    from {
+      transform: translateX(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes glow {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
     }
   }
   

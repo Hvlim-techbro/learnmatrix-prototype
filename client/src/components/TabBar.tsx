@@ -1,8 +1,10 @@
-import { useLocation, useRoute, Link } from 'wouter';
-import { Home, Mic, Presentation, Trophy, User, Users, Sparkles, ShoppingBag } from 'lucide-react';
+import { useLocation, Link } from 'wouter';
+import { Home, Mic, Presentation, Trophy, User, Users, ShoppingBag } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 export default function TabBar() {
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
   
   const tabs = [
     { name: 'Home', path: '/', icon: Home },
@@ -14,45 +16,51 @@ export default function TabBar() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 glass py-2 shadow-custom-md z-40">
-      <div className="max-w-screen-lg mx-auto px-2">
-        <div className="flex justify-around items-center">
-          {tabs.map(tab => {
-            const isActive = tab.path === location;
-            
-            return (
-              <Link 
-                key={tab.name} 
-                href={tab.path}
-                className={`flex flex-col items-center p-2 relative ${isActive ? 'transform scale-110' : ''}`}
-              >
-                {isActive && (
-                  <span className="absolute inset-0 rounded-xl bg-neutral-light opacity-70 -z-10"></span>
-                )}
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full 
-                  ${isActive ? 'bg-gradient-primary shadow-custom-sm' : 'bg-transparent'} 
-                  transition-all duration-300 ease-in-out`}>
-                  <tab.icon className={`h-5 w-5 ${isActive ? 'text-white animate-bounce-subtle' : 'text-neutral-darker'}`} />
-                </div>
-                <span className={`text-xs mt-1 font-medium 
-                  ${isActive ? 'text-primary' : 'text-neutral-darker'} 
-                  transition-colors duration-300`}>
-                  {tab.name}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+    <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-[#333] z-50">
+      <div className="grid grid-cols-6 h-16">
+        {tabs.map((tab, index) => {
+          const isActive = tab.path === location;
+          
+          return (
+            <Link 
+              key={tab.name} 
+              href={tab.path}
+              className="relative flex flex-col items-center justify-center"
+            >
+              {isActive && (
+                <motion.div 
+                  layoutId="tab-indicator"
+                  className="absolute inset-0 rounded-lg bg-[#222] z-0"
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <div className={cn(
+                "flex flex-col items-center justify-center w-full h-full z-10 transition-all",
+                isActive ? "text-primary scale-110" : "text-[#888]"
+              )}>
+                <tab.icon className={cn(
+                  "h-5 w-5 mb-1",
+                  isActive ? "text-primary" : "text-[#888]"
+                )} />
+                <span className="text-xs font-medium">{tab.name}</span>
+              </div>
+            </Link>
+          );
+        })}
       </div>
       
-      {/* Center Button - Quick Add/Access */}
-      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
+      {/* Center Button - Profile Access */}
+      <motion.div 
+        className="absolute -top-6 left-1/2 transform -translate-x-1/2"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+      >
         <Link href="/profile">
-          <button className="w-12 h-12 rounded-full bg-gradient-secondary flex items-center justify-center text-white shadow-custom-lg hover:shadow-custom-xl transition-all duration-300 hover:scale-110">
+          <button className="w-12 h-12 rounded-full bg-gradient-blue flex items-center justify-center text-white shadow-md hover:shadow-lg transition-all duration-300 hover:glow-primary">
             <User className="h-6 w-6" />
           </button>
         </Link>
-      </div>
+      </motion.div>
     </nav>
   );
 }
