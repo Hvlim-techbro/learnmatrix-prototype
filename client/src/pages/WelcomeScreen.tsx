@@ -2,9 +2,18 @@ import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
 
 export default function WelcomeScreen() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  useEffect(() => {
+    // For debugging - log current location
+    console.log('Current location:', location);
+    
+    // Force clear localStorage for testing welcome flow
+    localStorage.removeItem("learnMatrixOnboardingCompleted");
+  }, [location]);
 
   const handleGetStarted = () => {
     setLocation('/signup');
@@ -123,6 +132,43 @@ export default function WelcomeScreen() {
           >
             Watch Demo
           </button>
+          
+          {/* Debug Buttons - Hidden in Production */}
+          <div className="mt-8 space-y-2 border-t border-[#333] pt-4">
+            <p className="text-[12px] text-[#666]">Debug Navigation</p>
+            <div className="flex flex-wrap gap-2">
+              <button 
+                className="bg-[#333] text-[#aaa] text-[12px] px-2 py-1 rounded" 
+                onClick={() => setLocation('/splash')}
+              >
+                Splash
+              </button>
+              <button 
+                className="bg-[#333] text-[#aaa] text-[12px] px-2 py-1 rounded" 
+                onClick={() => setLocation('/signup')}
+              >
+                Signup
+              </button>
+              <button 
+                className="bg-[#333] text-[#aaa] text-[12px] px-2 py-1 rounded" 
+                onClick={() => setLocation('/profile-setup')}
+              >
+                Profile
+              </button>
+              <button 
+                className="bg-[#333] text-[#aaa] text-[12px] px-2 py-1 rounded" 
+                onClick={() => setLocation('/plan-selection')}
+              >
+                Plans
+              </button>
+              <button 
+                className="bg-[#333] text-[#aaa] text-[12px] px-2 py-1 rounded" 
+                onClick={() => setLocation('/home')}
+              >
+                Home
+              </button>
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>

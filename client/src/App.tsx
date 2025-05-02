@@ -48,15 +48,18 @@ function Router() {
     "/profile-setup",
     "/plan-selection"
   ].includes(location) && !hasCompletedOnboarding;
+  
+  // Force localStorage check for testing
+  // Uncomment to force welcome flow regardless of localStorage
+  // localStorage.removeItem("learnMatrixOnboardingCompleted");
 
   // Hide header and tab bar on welcome flow screens
   const showHeaderAndTabs = !isWelcomeFlowPage && location !== "/onboarding";
   
-  // If this is the first load and user hasn't completed onboarding,
-  // start with the splash screen
-  if (isInitialLoad && !hasCompletedOnboarding) {
-    return <SplashScreen />;
-  }
+  // Comment out this conditional to fix initial loading issues
+  // if (isInitialLoad && !hasCompletedOnboarding) {
+  //   return <SplashScreen />;
+  // }
 
   return (
     <div className={`min-h-screen flex flex-col ${showHeaderAndTabs ? 'bg-gradient-to-b from-neutral-lightest to-neutral-light' : 'bg-black'} relative`}>
@@ -84,6 +87,7 @@ function Router() {
           {/* Main App Routes */}
           <Route path="/onboarding" component={Onboarding} />
           <Route path="/home" component={Home} />
+          <Route path="/dashboard" component={Home} />
           <Route path="/audio-tutor" component={AudioTutor} />
           <Route path="/visual-tutor" component={VisualTutor} />
           <Route path="/quiz-battle" component={QuizBattle} />

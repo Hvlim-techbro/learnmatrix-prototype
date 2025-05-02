@@ -15,6 +15,9 @@ export default function SignUp() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Future feature: handle signup/login logic here
+    console.log('Submitting with:', { email, password });
+    
+    // Navigate to the profile setup page
     setLocation('/profile-setup');
   };
 
