@@ -73,23 +73,21 @@ export default function AudioTutor() {
           </div>
         </div>
         
-        {/* Visualizer */}
+        {/* Visualizer - Optimized for performance */}
         <div className="flex h-8 items-end space-x-0.5 mb-4">
-          {Array.from({ length: 50 }).map((_, i) => {
+          {Array.from({ length: 30 }).map((_, i) => { // Reduced number of bars
             // Create a wave pattern with Math.sin
             const height = Math.abs(Math.sin((i + currentTime) * 0.2)) * 100;
             const displayHeight = isPlaying ? height : height * 0.3;
             
             return (
-              <motion.div 
+              <div 
                 key={i}
-                className="w-0.5 bg-gradient-primary rounded-t"
-                style={{ height: `${displayHeight}%` }}
-                animate={{
-                  height: isPlaying ? `${displayHeight}%` : '10%', 
+                className={`w-1 ${isPlaying ? 'bg-gradient-primary' : 'bg-[#333]'} rounded-t transition-all duration-200`}
+                style={{ 
+                  height: `${displayHeight}%`,
                   opacity: isPlaying ? 1 : 0.5
                 }}
-                transition={{ duration: 0.2 }}
               />
             );
           })}
@@ -142,39 +140,32 @@ export default function AudioTutor() {
         </div>
       </motion.div>
       
-      {/* Upcoming Episodes */}
-      <div>
+      {/* Upcoming Episodes - Performance Optimized */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <h3 className="font-semibold mb-4 text-white">Up Next</h3>
         <div className="space-y-3">
           {upcomingLessons.map((lesson, index) => (
-            <motion.div 
+            <div 
               key={lesson.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="bg-[#111] rounded-xl p-4 shadow-md border border-[#222] flex items-center"
-              whileHover={{ y: -5, borderColor: '#333', backgroundColor: '#161616' }}
-              whileTap={{ scale: 0.98 }}
+              className="bg-[#111] rounded-xl p-4 shadow-md border border-[#222] flex items-center hover:border-[#333] hover:bg-[#161616] transition-colors"
             >
-              <motion.div 
-                className="bg-[#222] rounded-lg w-10 h-10 flex items-center justify-center text-[#888] mr-4"
-                whileHover={{ 
-                  scale: 1.1, 
-                  backgroundColor: '#3B82F6', 
-                  color: '#fff' 
-                }}
-                whileTap={{ scale: 0.95 }}
+              <div 
+                className="bg-[#222] rounded-lg w-10 h-10 flex items-center justify-center text-[#888] mr-4 hover:bg-[#3B82F6] hover:text-white transition-colors"
               >
                 <Play className="h-4 w-4 ml-0.5" />
-              </motion.div>
+              </div>
               <div>
                 <h4 className="font-medium text-white">{lesson.title}</h4>
                 <p className="text-xs text-[#888]">Part {index + 3} of 5 • {formatTime(lesson.duration)}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

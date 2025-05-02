@@ -22,22 +22,22 @@ export default function ProgressCard() {
   
   const xpForCurrentLevel = currentXp % xpPerLevel;
   
+  // Performance optimized variants - reduced animations
   const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      y: 0,
       transition: {
-        delay: 0.1,
+        duration: 0.3,
         when: "beforeChildren",
-        staggerChildren: 0.1
+        staggerChildren: 0.05 // Reduced stagger time
       }
     }
   };
   
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 }
   };
   
   return (
@@ -47,53 +47,32 @@ export default function ProgressCard() {
       initial="hidden"
       animate="visible"
     >
-      {/* Background decorative elements */}
-      <div className="absolute w-64 h-64 rounded-full -top-20 -right-20 bg-gradient-primary opacity-5 blur-xl"></div>
-      <div className="absolute w-48 h-48 rounded-full -bottom-20 -left-20 bg-gradient-secondary opacity-5 blur-xl"></div>
+      {/* Background decorative elements - optimized with lower blur */}
+      <div className="absolute w-64 h-64 rounded-full -top-20 -right-20 bg-gradient-primary opacity-5 blur-md"></div>
+      <div className="absolute w-48 h-48 rounded-full -bottom-20 -left-20 bg-gradient-secondary opacity-5 blur-md"></div>
       
       <div className="relative z-10">
         <motion.div className="flex justify-between items-center mb-6" variants={itemVariants}>
           <div className="flex items-center">
-            <motion.div 
-              className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center shadow-md"
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center shadow-md">
               <Award className="h-5 w-5 text-white" />
-            </motion.div>
+            </div>
             <h3 className="font-semibold ml-3 text-lg text-white">Your Progress</h3>
           </div>
-          <motion.div 
-            className="flex items-center bg-gradient-primary text-white px-3 py-1 rounded-full shadow-md"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <div className="flex items-center bg-gradient-primary text-white px-3 py-1 rounded-full shadow-md">
             <Star className="h-4 w-4 mr-1" />
             <span className="text-sm font-medium">Level</span>
-            <motion.span 
-              className="text-sm font-bold ml-1"
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              key={currentLevel}
-            >
-              {currentLevel}
-            </motion.span>
-          </motion.div>
+            <span className="text-sm font-bold ml-1">{currentLevel}</span>
+          </div>
         </motion.div>
         
-        {/* XP Progress Bar */}
+        {/* XP Progress Bar - Simplified motion */}
         <motion.div className="mb-6" variants={itemVariants}>
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center">
               <Zap className="h-4 w-4 text-[hsl(var(--accent-yellow))] mr-1" />
               <span className="text-sm font-medium text-white">
-                <motion.span
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  key={xpForCurrentLevel}
-                >
-                  {xpForCurrentLevel}
-                </motion.span>
+                {xpForCurrentLevel}
                 <span className="text-[#888] mx-1">/</span>
                 {xpPerLevel} XP
               </span>
@@ -106,34 +85,27 @@ export default function ProgressCard() {
           <div className="h-3 bg-[#222] rounded-full overflow-hidden">
             <motion.div 
               className="h-full bg-gradient-primary rounded-full"
+              style={{ width: `${progress}%` }}
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 0.5 }} // Reduced animation time
             ></motion.div>
           </div>
         </motion.div>
         
-        {/* Stats Overview */}
+        {/* Stats Overview - Reduced hover animations */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           {/* Streak Info */}
           <motion.div 
-            className="bg-[#161616] border border-[#222] rounded-lg p-3 flex items-center"
+            className="bg-[#161616] border border-[#222] rounded-lg p-3 flex items-center hover:border-[#333]"
             variants={itemVariants}
-            whileHover={{ scale: 1.03, y: -2 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <div className="w-8 h-8 rounded-lg bg-gradient-yellow flex items-center justify-center shadow-md mr-3">
-              <Flame className="h-4 w-4 text-white animate-pulse-custom" />
+              <Flame className="h-4 w-4 text-white" />
             </div>
             <div>
               <div className="font-semibold text-sm text-white">
-                <motion.span
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  key={user?.streak || 0}
-                >
-                  {user?.streak || 0}
-                </motion.span> Day Streak
+                {user?.streak || 0} Day Streak
               </div>
               <div className="text-xs text-[#888]">{user?.streak ? "Keep it going!" : "Start today!"}</div>
             </div>
@@ -141,35 +113,25 @@ export default function ProgressCard() {
           
           {/* Badges Info */}
           <motion.div 
-            className="bg-[#161616] border border-[#222] rounded-lg p-3 flex items-center"
+            className="bg-[#161616] border border-[#222] rounded-lg p-3 flex items-center hover:border-[#333]"
             variants={itemVariants}
-            whileHover={{ scale: 1.03, y: -2 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <div className="w-8 h-8 rounded-lg bg-gradient-purple flex items-center justify-center shadow-md mr-3">
               <Award className="h-4 w-4 text-white" />
             </div>
             <div>
               <div className="font-semibold text-sm text-white">
-                <motion.span
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  key={badges.length}
-                >
-                  {badges.length}
-                </motion.span> Badges
+                {badges.length} Badges
               </div>
               <div className="text-xs text-[#888]">{badges.length ? "Keep collecting!" : "Earn your first!"}</div>
             </div>
           </motion.div>
         </div>
         
-        {/* Tier Status */}
+        {/* Tier Status - Reduced animations */}
         <motion.div 
-          className="bg-[#161616] border border-[#222] rounded-lg p-3 flex items-center justify-between cursor-pointer group hover:border-[#333] transition-all duration-300"
+          className="bg-[#161616] border border-[#222] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:border-[#333] transition-colors"
           variants={itemVariants}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
         >
           <div className="flex items-center">
             <div className="w-8 h-8 rounded-lg bg-gradient-green flex items-center justify-center shadow-md mr-3">
@@ -180,13 +142,9 @@ export default function ProgressCard() {
               <div className="text-xs text-[#888]">Cohort Tier</div>
             </div>
           </div>
-          <motion.div 
-            initial={{ x: -5, opacity: 0 }}
-            whileHover={{ x: 0, opacity: 1 }}
-            className="text-primary"
-          >
+          <div className="text-primary">
             <ArrowRight className="h-4 w-4" />
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     </motion.div>

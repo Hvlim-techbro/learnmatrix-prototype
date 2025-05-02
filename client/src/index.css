@@ -70,10 +70,10 @@
   --glow-yellow: 0 0 15px rgba(250, 204, 21, 0.5);
   --glow-red: 0 0 15px rgba(239, 68, 68, 0.5);
   
-  /* Blurs */
-  --blur-sm: blur(4px);
-  --blur-md: blur(8px);
-  --blur-lg: blur(16px);
+  /* Blurs - optimized for performance */
+  --blur-sm: blur(2px);
+  --blur-md: blur(4px);
+  --blur-lg: blur(8px);
   
   /* Glass morphism - dark mode */
   --glass-background: rgba(31, 35, 45, 0.7);
