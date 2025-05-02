@@ -1,13 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Module, Challenge, User, Badge } from '@shared/schema';
 import ProgressCard from '@/components/ProgressCard';
 import ModuleCard from '@/components/ModuleCard';
 import ChallengeCard from '@/components/ChallengeCard';
-import { Calendar, Zap, Flame, Award, ChevronRight, BookOpen, Activity, TrendingUp } from 'lucide-react';
+import GuidedTour from '@/components/GuidedTour';
+import { Calendar, Zap, Flame, Award, ChevronRight, BookOpen, Activity, TrendingUp, HelpCircle } from 'lucide-react';
 import AchievementBadge from '@/components/AchievementBadge';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
+  const [showTour, setShowTour] = useState(false);
+
+  // Show the tour when component mounts
+  useEffect(() => {
+    // Check if this is the first time the user visits
+    const hasSeenTour = localStorage.getItem('hasSeenTour');
+    if (!hasSeenTour) {
+      setShowTour(true);
+      localStorage.setItem('hasSeenTour', 'true');
+    }
+  }, []);
+
   const { data: user } = useQuery<User>({
     queryKey: ['/api/user'],
   });
@@ -52,6 +66,18 @@ export default function Home() {
 
   return (
     <div className="p-6">
+      {/* Guided Tour */}
+      <GuidedTour isOpen={showTour} onClose={() => setShowTour(false)} />
+      
+      {/* Help button to re-open the tour */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={() => setShowTour(true)}
+          className="rounded-full w-12 h-12 bg-gradient-primary shadow-custom-lg flex items-center justify-center"
+        >
+          <HelpCircle className="h-6 w-6 text-white" />
+        </Button>
+      </div>
       {/* Welcome Section - Hero */}
       <div className="mb-10 animate-fade-in">
         <div className="flex flex-col md:flex-row md:items-center justify-between">

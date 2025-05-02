@@ -3,63 +3,74 @@
 @tailwind utilities;
 
 :root {
-  --background: 220 45% 98%;
-  --foreground: 222 47% 11%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215 25% 35%;
+  /* Main color palette - clean black and white theme with blue accents */
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 240 10% 3.9%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --primary: 222 100% 61%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 346 100% 66%;
+  --card-foreground: 240 10% 3.9%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  
+  /* Primary - deep blue */
+  --primary: 220 70% 50%;
+  --primary-foreground: 0 0% 100%;
+  
+  /* Secondary - vibrant accent for highlights */
+  --secondary: 262 83% 58%;
   --secondary-foreground: 0 0% 100%;
-  --accent: 240 5.9% 10%;
-  --accent-foreground: 0 0% 100%;
+  
+  /* Other functional colors */
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --ring: 222 100% 61%;
-  --radius: 1rem;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 5% 64.9%;
+  --radius: 0.75rem;
   
-  /* Custom accent colors */
-  --accent-purple: 267 83% 60%;
-  --accent-green: 160 84% 39%;
-  --accent-yellow: 35 93% 55%;
-  --accent-blue: 198 93% 60%;
+  /* Common accent colors - all using the same saturation/lightness for consistency */
+  --accent-blue: 220 70% 50%; /* Matches primary */
+  --accent-purple: 262 83% 58%; /* Matches secondary */
+  --accent-green: 142 70% 45%; 
+  --accent-yellow: 35 85% 55%;
+  --accent-orange: 20 90% 59%;
+  --accent-red: 0 84% 60%; /* Matches destructive */
   
-  /* Custom theme colors */
-  --neutral-lightest: 210 50% 98%;
-  --neutral-light: 210 40% 96%;
-  --neutral: 214 32% 91%;
-  --neutral-dark: 215 20% 65%;
-  --neutral-darker: 215 25% 35%;
-  --neutral-darkest: 222 47% 11%;
+  /* Neutral shades - consistent palette */
+  --neutral-lightest: 240 5% 98%;
+  --neutral-light: 240 5% 95%;
+  --neutral: 240 5% 90%;
+  --neutral-dark: 240 5% 65%;
+  --neutral-darker: 240 5% 35%;
+  --neutral-darkest: 240 5% 10%;
   
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, hsl(222, 100%, 61%) 0%, hsl(242, 83%, 60%) 100%);
-  --gradient-secondary: linear-gradient(135deg, hsl(346, 100%, 66%) 0%, hsl(338, 100%, 76%) 100%);
-  --gradient-purple: linear-gradient(135deg, hsl(267, 83%, 60%) 0%, hsl(283, 83%, 70%) 100%);
-  --gradient-green: linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(174, 84%, 49%) 100%);
-  --gradient-yellow: linear-gradient(135deg, hsl(35, 93%, 55%) 0%, hsl(45, 93%, 65%) 100%);
-  --gradient-blue: linear-gradient(135deg, hsl(198, 93%, 60%) 0%, hsl(188, 93%, 70%) 100%);
+  /* Gradients - consistent color transitions */
+  --gradient-primary: linear-gradient(135deg, hsl(220, 70%, 50%) 0%, hsl(230, 70%, 60%) 100%);
+  --gradient-secondary: linear-gradient(135deg, hsl(262, 83%, 58%) 0%, hsl(272, 83%, 68%) 100%);
+  --gradient-purple: linear-gradient(135deg, hsl(262, 83%, 58%) 0%, hsl(272, 83%, 68%) 100%);
+  --gradient-green: linear-gradient(135deg, hsl(142, 70%, 45%) 0%, hsl(152, 70%, 55%) 100%);
+  --gradient-yellow: linear-gradient(135deg, hsl(35, 85%, 55%) 0%, hsl(45, 85%, 65%) 100%);
+  --gradient-blue: linear-gradient(135deg, hsl(220, 70%, 50%) 0%, hsl(210, 70%, 60%) 100%);
+  --gradient-red: linear-gradient(135deg, hsl(0, 84%, 60%) 0%, hsl(10, 84%, 70%) 100%);
+  --gradient-dark: linear-gradient(135deg, hsl(240, 10%, 10%) 0%, hsl(240, 10%, 20%) 100%);
   
-  /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.16);
+  /* Shadows - subtle and consistent */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.12);
   
   /* Blurs */
   --blur-sm: blur(4px);
   --blur-md: blur(8px);
   --blur-lg: blur(16px);
   
-  /* Glass morphism */
-  --glass-background: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.18);
+  /* Glass morphism - consistent transparency */
+  --glass-background: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.25);
 }
 
 .dark {

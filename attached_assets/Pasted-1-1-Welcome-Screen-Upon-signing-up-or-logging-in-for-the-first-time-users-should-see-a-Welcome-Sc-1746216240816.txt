@@ -1,0 +1,123 @@
+1.1. Welcome Screen
+
+Upon signing up or logging in for the first time, users should see a Welcome Screen that gives them a warm introduction to LearnMatrix and prompts them to begin the onboarding process. This screen should be visually appealing and simple to navigate.
+	•	Visual Design:
+	•	The background can be an engaging visual that highlights learning, growth, or technology to align with the platform’s mission.
+	•	A short, friendly message: “Welcome to LearnMatrix! Ready to start your personalized learning journey?”
+	•	Call-to-Action (CTA): “Let’s Go!” button, which begins the onboarding experience.
+
+⸻
+
+1.2. User Profile Setup
+
+After clicking “Let’s Go!”, users are prompted to set up their profile. This step allows LearnMatrix to personalize the user’s experience based on their preferences and learning goals.
+	•	Fields to Complete:
+	•	Name: For personalization.
+	•	Learning Preferences:
+	•	Preferred learning style (e.g., text-based, audio-based, visual, mixed).
+	•	Areas of interest or subject areas (e.g., Business, Technology, Engineering, Soft Skills, etc.). This will help in recommending specific courses.
+	•	Voice Preferences for AI Tutors:
+	•	Users can select their preferred voice style (e.g., friendly, formal, casual).
+	•	Users can adjust humor level of AI tutors (e.g., playful, serious, balanced).
+	•	Progress Tracking Preferences: Option to track progress in terms of completed courses, quizzes, and earned points.
+	•	Visual Design:
+	•	Use sliders, dropdowns, and checklists for easy customization.
+	•	CTA Button: “Save & Continue” to move to the next step.
+
+⸻
+
+1.3. Introduction to Key Features
+
+Once the profile is set up, users are introduced to the main features of LearnMatrix via a guided, interactive walkthrough. This walkthrough is designed to familiarize users with the platform’s most essential features without overwhelming them.
+	•	Interactive Tour:
+	•	The AI Assistant will guide users step-by-step, showing them the layout and how to access various features.
+
+⸻
+
+2. Guided Tour of Key Features
+
+The guided tour should be engaging and interactive, using tooltips, modals, or pop-up windows to direct the user’s attention to specific sections of the platform. Below is a detailed breakdown of the main features covered in the tour.
+
+2.1. AI Visual Tutor Introduction
+	•	Description: This section introduces users to the AI Visual Tutor, which delivers lessons via interactive whiteboard-style animations.
+	•	Tour Message: “This is your AI Visual Tutor. It will guide you through lessons in an easy-to-follow animation style. Let’s check out a demo lesson!”
+	•	Demo: The user is presented with a demo lesson, such as a simple explanation of basic math, programming, or a soft skill like communication.
+	•	Interaction: The user can click “Start Lesson” and watch a demo, with controls to pause, skip ahead, or ask questions.
+	•	Call-to-Action: After the demo, show the option to “Got it! Let’s move on.”
+
+⸻
+
+2.2. AI Audio Tutor Walkthrough
+	•	Description: This feature introduces the AI Audio Tutor, which delivers lessons in a podcast-style format with real-time interaction.
+	•	Tour Message: “This is the AI Audio Tutor, where you can engage with dual AI hosts and ask questions in real-time.”
+	•	Demo: Show a short conversation between the two AI hosts about a specific topic (e.g., how to manage stress or a topic in technology).
+	•	Interaction: Prompt the user to type or speak a question, demonstrating how the system responds dynamically.
+	•	Call-to-Action: “Ready to ask your own question? Let’s continue to the next feature.”
+
+⸻
+
+2.3. Quiz Battle Arena Introduction
+	•	Description: The Quiz Battle Arena is a fun, competitive quiz feature where users can compete against each other or challenge themselves.
+	•	Tour Message: “Welcome to the Quiz Battle Arena! Here you can compete on different topics and test your knowledge.”
+	•	Demo: Show a quick example of a quiz with a countdown timer, question options, and instant feedback once the user answers.
+	•	Interaction: Let the user answer a sample question and see how they do.
+	•	Call-to-Action: After completing the demo quiz, display a button to proceed with “Let’s continue to Cohorts.”
+
+⸻
+
+2.4. Cohorts & Gamification Overview
+	•	Description: Introduce the Cohort Engine and explain the gamified learning system with different tiers (Novice Nexus, Scholar Circle, etc.).
+	•	Tour Message: “Join a cohort to collaborate with peers, share resources, and track your progress. The more you engage, the higher your cohort tier!”
+	•	Demo: Show the visual of the Novice Nexus tier and briefly explain how users progress through the tiers (Scholar Circle, Mentor Hive, etc.).
+	•	Interaction: Users can join a cohort based on their interest or start a new one. Show a demo of joining a group.
+	•	Call-to-Action: “Let’s move on to the Rewards and Shop.”
+
+⸻
+
+2.5. Reward System & Shop
+	•	Description: Show how users can earn rewards (points, bonuses, exclusive content) based on their engagement.
+	•	Tour Message: “As you learn and participate, you’ll earn points that can be redeemed in the Reward Store for exclusive content and bonuses!”
+	•	Demo: Show the Reward Store with some available items (e.g., bonus content, XP boosts, learning material packs).
+	•	Interaction: Let the user browse through a few rewards and explain the redemption process.
+	•	Call-to-Action: “Let’s complete your profile setup!”
+
+⸻
+
+3. Final Setup & Completion
+
+After the guided tour, users are taken to their personalized dashboard to begin their learning journey.
+
+3.1. Dashboard Overview
+	•	Description: The dashboard is the user’s home base where they can track their progress, view ongoing courses, check cohort activities, and see notifications.
+	•	Tour Message: “Here’s your personalized dashboard! From here, you can access your courses, track your progress, and stay updated on cohort activities.”
+	•	Interaction: Show the Courses, Cohorts, Quizzes, and Rewards sections clearly.
+	•	Call-to-Action: “Start learning! Choose a course and dive in!”
+
+⸻
+
+3.2. Start Your Learning Journey
+	•	After the onboarding process is complete, the user is encouraged to start a course or engage with the platform. This step should be accompanied by a congratulations message.
+	•	Message: “You’re all set! Get started with your first lesson, or explore the platform further.”
+	•	CTA: “Start Learning!”
+
+⸻
+
+4. Additional Features for Onboarding
+
+4.1. Skip or Retry the Tour
+	•	Users can opt to skip the tour if they prefer to explore on their own. This can be done via a simple “Skip” button at the top of the tour screen.
+	•	If a user skips the tour, they should still be able to access the tour again later through the Help Center or Settings.
+
+4.2. Tooltips and In-App Help
+	•	Tooltips: These will appear when users hover over certain elements, providing brief descriptions of what each button, feature, or section does. This can be especially useful for first-time users.
+	•	In-App Help: A Help Center with FAQ, troubleshooting guides, and video tutorials will be available to assist users in understanding platform features.
+	•	Chatbot: A virtual assistant that users can access at any time during their journey to ask questions.
+
+4.3. Live Chat for Support
+	•	If the user encounters difficulties, they should be able to initiate a live chat with a support agent or the AI assistant for help.
+
+⸻
+
+5. User Journey During Onboarding
+
+Here’s a step-by-step summary of the user’s journey through the onboarding process:
