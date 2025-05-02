@@ -1,0 +1,57 @@
+1. UI Design Details
+
+1.1. Branding & Visual Identity
+	•	Color Scheme:
+	•	Primary Colors: Green (representing growth and learning) and Blue (representing trust and professionalism).
+	•	Secondary Colors: Light gray or white for background, accent colors for calls-to-action (buttons, highlights), and dark gray/black for text.
+	•	Tone: Professional yet welcoming. Use modern gradients, simple patterns, and icons to give it a clean, tech-driven vibe.
+	•	Typography:
+	•	Headers: Bold, sans-serif font for clarity (e.g., Poppins or Roboto).
+	•	Body Text: Clean, easy-to-read font (e.g., Open Sans or Inter).
+	•	Button Text: Bold and capitalized for emphasis.
+
+1.2. Layout & Structure
+	•	Home Page:
+	•	Hero Section: A welcoming section with a concise description of LearnMatrix, showcasing the benefits of AI-powered learning. Include a CTA to sign up or login.
+	•	Features Showcase: Scrolling section that highlights key features such as AI Visual Tutor, AI Audio Tutor, Cohort Engine, and rewards system.
+	•	Footer: Links to privacy policy, terms of service, about, and contact details.
+	•	Dashboard:
+	•	Navigation Bar: Fixed navigation bar at the top, accessible on all pages, with sections such as Home, Courses, Cohorts, Rewards, Profile, Settings.
+	•	Sidebar: Optional for learners to quickly access sections like their active cohort, ongoing courses, or progress analytics.
+	•	Main Content Area: This area dynamically changes depending on what the user is interacting with (e.g., quiz, lesson, progress tracking).
+	•	Course/Content Pages:
+	•	Lesson Page:
+	•	For the AI Visual Tutor, show a whiteboard-style animation with progress controls.
+	•	For the Interactive Audio Tutor, display dual AI hosts, and provide the option for the user to interrupt or ask questions.
+	•	Content Interaction: Buttons for play, pause, ask a question, view summary, and quiz.
+	•	Cohort Page:
+	•	Show learner progress in a gamified layout (Novice Nexus, Scholar Circle, etc.).
+	•	Include leaderboards, milestones, and team interactions (chat, task assignments, etc.).
+	•	Profile Page:
+	•	Personal Info: Editable section for profile picture, name, and bio.
+	•	Learning Progress: A visual chart showing completed courses, quiz scores, and feedback.
+	•	Settings: Options to modify notification preferences, change password, and select voice styles or humor levels for AI tutors.
+	•	Rewards & Shop:
+	•	A reward store with items (content unlocks, personalized coaching sessions, etc.) that can be redeemed with points earned through activities.
+	•	XP Boosts, Bonus Content, and Learning Material Packs should be clearly visible, with a simple redemption process.
+
+⸻
+
+1.3. Interaction Design
+	•	Interactive Features:
+	•	Synchronous Live Jam Mode:
+	•	Users can engage with the AI in real-time conversations, asking questions and getting immediate clarifications. Design this interaction as a dynamic conversation bubble with visual/audio cues when the AI responds.
+	•	Quizzes:
+	•	Gamified quizzes with a Quiz Battle Arena design where users can challenge each other. Include a progress bar and score feedback at the end of each quiz.
+	•	Voice/Text Inputs:
+	•	When interacting with the AI, allow users to input queries either by voice or text.
+	•	Animations & Transitions:
+	•	Use smooth transitions between pages (e.g., fade-ins) and interactive animations (e.g., quiz transitions, cohort level-ups) to enhance user experience.
+	•	Responsive Design:
+	•	Ensure that all pages are responsive on mobile, tablet, and desktop. Elements like the cohort leaderboard, profile page, and progress bars should adapt to different screen sizes.
+
+⸻
+
+2. User Flow for LearnMatrix
+
+Below is the detailed user flow showing how users interact with LearnMatrix from the moment they log in to engaging with content, quizzes, cohorts, and rewards.

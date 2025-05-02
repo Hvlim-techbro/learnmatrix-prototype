@@ -1,0 +1,32 @@
+
+
+⸻
+
+2.2. Step-by-Step User Flow:
+	1.	Home Page:
+	•	Sign Up / Login: New users sign up by entering email or using social logins (Google, Facebook, etc.). Returning users log in to access their learning dashboard.
+	2.	Dashboard (Main User Interface):
+	•	After logging in, users are directed to the Dashboard, where they see an overview of their profile, active courses, cohort membership, and notifications.
+	•	A navigation bar allows users to quickly access Courses, Cohorts, Rewards, and Profile.
+	3.	Courses Page:
+	•	Active Courses: Users can see all the courses they are enrolled in, along with progress indicators.
+	•	Users can select a course, which opens up the AI Visual Tutor or AI Audio Tutor depending on their selection.
+	4.	Lesson Interaction:
+	•	The AI Visual Tutor delivers lessons in a whiteboard-style animation.
+	•	The Interactive Audio Tutor is available for users to engage in real-time conversations with dual AI hosts, asking questions via text or voice.
+	•	The user can pause, ask questions, and view summaries of the lesson.
+	5.	Quizzes:
+	•	After completing a lesson, users can take a quiz.
+	•	Quizzes are presented in the Quiz Battle Arena for competitive learning or personal assessment.
+	•	Upon completing a quiz, users receive a score and progress update.
+	6.	Cohort Page:
+	•	Users can join a cohort, participate in collaborative learning, and track progress through gamified tiers.
+	•	Cohort Interaction allows users to engage in group discussions, assign tasks, and track their individual and group progress.
+	7.	Rewards and Shop:
+	•	Users earn points based on activity (completing lessons, quizzes, group tasks, etc.).
+	•	These points can be redeemed in the Rewards Store for premium content, bonus lessons, or personalized coaching sessions.
+	8.	Profile Page:
+	•	Learning Progress: Users can view detailed reports of their achievements, quiz scores, and milestones.
+	•	Settings: Users can adjust personal settings, change passwords, and customize voice preferences for the AI tutors.
+	9.	Notifications:
+	•	Users receive real-time notifications regarding course updates, quiz challenges, cohort activities, and available rewards
