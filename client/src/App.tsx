@@ -14,39 +14,76 @@ import QuizBattle from "@/pages/QuizBattle";
 import CohortEngine from "@/pages/CohortEngine";
 import Profile from "@/pages/Profile";
 import RewardShop from "@/pages/RewardShop";
+import SplashScreen from "@/pages/SplashScreen";
+import WelcomeScreen from "@/pages/WelcomeScreen";
+import SignUp from "@/pages/SignUp";
+import ProfileSetup from "@/pages/ProfileSetup";
+import PlanSelection from "@/pages/PlanSelection";
 import { useEffect, useState } from "react";
 
 function Router() {
   const [location] = useLocation();
-  const [hasVisited, setHasVisited] = useState(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    // Check if user has visited before 
-    const visited = localStorage.getItem("hasVisitedLearnMatrix");
-    setHasVisited(!!visited);
+    // Check if user has completed the onboarding flow
+    const onboardingCompleted = localStorage.getItem("learnMatrixOnboardingCompleted");
+    setHasCompletedOnboarding(!!onboardingCompleted);
     
-    // Set visited flag if not already set
-    if (!visited) {
-      localStorage.setItem("hasVisitedLearnMatrix", "true");
-    }
+    // Clear the initial load state after checking
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
-  // Hide header and tab bar on onboarding screens
-  const showHeaderAndTabs = location !== "/onboarding";
+  // Determine if this is a welcome flow page
+  const isWelcomeFlowPage = [
+    "/", 
+    "/splash",
+    "/welcome",
+    "/signup",
+    "/profile-setup",
+    "/plan-selection"
+  ].includes(location) && !hasCompletedOnboarding;
+
+  // Hide header and tab bar on welcome flow screens
+  const showHeaderAndTabs = !isWelcomeFlowPage && location !== "/onboarding";
+  
+  // If this is the first load and user hasn't completed onboarding,
+  // start with the splash screen
+  if (isInitialLoad && !hasCompletedOnboarding) {
+    return <SplashScreen />;
+  }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-neutral-lightest to-neutral-light relative">
-      {/* Abstract background patterns */}
-      <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-gradient-primary opacity-5 blur-3xl"></div>
-      <div className="absolute top-1/3 -left-32 w-64 h-64 rounded-full bg-gradient-purple opacity-5 blur-3xl"></div>
-      <div className="absolute bottom-1/4 right-10 w-48 h-48 rounded-full bg-gradient-blue opacity-5 blur-3xl"></div>
+    <div className={`min-h-screen flex flex-col ${showHeaderAndTabs ? 'bg-gradient-to-b from-neutral-lightest to-neutral-light' : 'bg-black'} relative`}>
+      {showHeaderAndTabs && (
+        <>
+          {/* Abstract background patterns */}
+          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-gradient-primary opacity-5 blur-3xl"></div>
+          <div className="absolute top-1/3 -left-32 w-64 h-64 rounded-full bg-gradient-purple opacity-5 blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-10 w-48 h-48 rounded-full bg-gradient-blue opacity-5 blur-3xl"></div>
+        </>
+      )}
       
       {showHeaderAndTabs && <Header />}
       
-      <main className="flex-1 overflow-y-auto pb-20 max-w-screen-lg w-full mx-auto relative z-10">
+      <main className={`flex-1 overflow-y-auto ${showHeaderAndTabs ? 'pb-20 max-w-screen-lg w-full mx-auto' : 'w-full'} relative z-10`}>
         <Switch>
-          <Route path="/" component={hasVisited ? Home : Onboarding} />
+          {/* Welcome Flow Routes */}
+          <Route path="/" component={hasCompletedOnboarding ? Home : WelcomeScreen} />
+          <Route path="/splash" component={SplashScreen} />
+          <Route path="/welcome" component={WelcomeScreen} />
+          <Route path="/signup" component={SignUp} />
+          <Route path="/profile-setup" component={ProfileSetup} />
+          <Route path="/plan-selection" component={PlanSelection} />
+          
+          {/* Main App Routes */}
           <Route path="/onboarding" component={Onboarding} />
+          <Route path="/home" component={Home} />
           <Route path="/audio-tutor" component={AudioTutor} />
           <Route path="/visual-tutor" component={VisualTutor} />
           <Route path="/quiz-battle" component={QuizBattle} />
@@ -60,8 +97,10 @@ function Router() {
       
       {showHeaderAndTabs && <TabBar />}
       
-      {/* Additional decorative element at the bottom */}
-      <div className="fixed bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-neutral-light to-transparent -z-10"></div>
+      {showHeaderAndTabs && (
+        // Additional decorative element at the bottom
+        <div className="fixed bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-neutral-light to-transparent -z-10"></div>
+      )}
     </div>
   );
 }

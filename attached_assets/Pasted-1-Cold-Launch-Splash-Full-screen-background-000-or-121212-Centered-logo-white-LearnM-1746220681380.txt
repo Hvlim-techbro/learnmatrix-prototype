@@ -1,0 +1,139 @@
+1. Cold Launch & Splash
+	•	Full‐screen background: #000 (or #121212)
+	•	Centered logo: white “LearnMatrix” wordmark + spark icon
+	•	Subtle pulse animation behind the logo
+	•	Tip text at bottom (Inter 300, 14 px, #888): “Adaptive AI Learning, Tailored for You”
+	•	Duration: ~1.5 s, then auto-fade to Welcome
+
+⸻
+
+2. Welcome Screen
+	•	BG: #1E1E1E
+	•	Illustration: abstract line art of learners + AI—monochrome with cyan highlights
+	•	Headline (Inter 600, 28 px, #FFF): “Learn Smarter. Anywhere.”
+	•	Sub-headline (Inter 400, 16 px, #CCC): “Podcast-style, whiteboard visuals & community challenges.”
+	•	Primary CTA: Rounded button (Cyan #29B6F6 fill, 16 px, white text) “Get Started”
+	•	Secondary CTA: Text link (Inter 500, 16 px, Cyan) “Watch Demo”
+	•	Nav hint: small hamburger icon top-right to access Settings/Language
+
+Tap “Get Started” → Sign-Up
+
+⸻
+
+3. Sign-Up / Login
+	•	BG: #121212
+	•	Title (Inter 600, 24 px, #FFF): “Join LearnMatrix”
+	•	OAuth Buttons:
+	•	White fill + brand icon + “Continue with Google/Facebook/Apple” (radius 8 px)
+	•	Divider: “— Or —” (Inter 300, 14 px, #555)
+	•	Email Form: inputs (bg #1E1E1E, border #333, placeholder #777, text #EEE)
+	•	Continue Button: Cyan fill, large, sticky at bottom
+	•	Footer: “By continuing, you agree to our Terms & Privacy.” (Inter 300, 12 px, #555)
+
+On success → Profile Setup
+
+⸻
+
+4. Profile Setup
+
+4.1 Personal Details
+	•	Card (bg #1E1E1E, border #333, radius 8 px, padding 16 px)
+	•	Fields: Name, Age bracket (select chip list), Country (dropdown)
+	•	Next button (Cyan) / Skip (text link)
+
+4.2 Goals & Preferences
+	•	Section header (Inter 600, 20 px, #FFF): “Your Goals & Style”
+	•	Goal Chips: rounded toggles (#1E1E1E bg, #29B6F6 outline, #29B6F6 text when selected)
+	•	Mode Toggles: icon + label for Audio, Visual, Quiz, Cohort (gray vs. cyan fill when on)
+	•	Time Budget: chips for “<2 hrs/wk” etc.
+	•	Save & Continue (Cyan button)
+
+→ Plan Picker
+
+⸻
+
+5. Plan Picker
+	•	Split screen: two cards side-by-side (stacked on mobile)
+	•	Freemium Card (bg #1E1E1E, border #333):
+	•	Title (Inter 600, 18 px): “Freemium”
+	•	Bulleted features (Inter 400, 14 px, #CCC)
+	•	Button: Outline Cyan “Start Free”
+	•	Pro Card (bg #1E1E1E, slightly elevated shadow):
+	•	Title: “Pro – ₦X / $12 mo”
+	•	Features list, cyan check icons
+	•	Button: Solid Cyan “Go Pro”
+
+Tap either → Mini Loader → Dashboard
+
+⸻
+
+6. Mini Loader
+	•	Overlay: semi-opaque black (#000, 70% opacity)
+	•	Spinner: Cyan ring
+	•	Text (Inter 400, 14 px, #FFF): “Setting up your learning space…”
+
+⸻
+
+7. Home Dashboard
+
+A. Header
+	•	BG: #1E1E1E
+	•	Left: hamburger menu icon (white)
+	•	Center: “Hi, Jordan!” (Inter 600, 24 px, #29B6F6) + 👋 emoji
+	•	Right: bell icon + avatar circle (JL initials, cyan background)
+
+B. Next Best Action Card
+	•	Card: bg #2A2A2A, border #333, radius 8 px, padding 16 px
+	•	Title (Inter 600, 18 px, #FFF): “Continue: AI Audio Tutor”
+	•	Subtitle (Inter 400, 14 px, #CCC): “Intro to Generative AI”
+	•	Progress Bar: cyan fill on dark track
+	•	Play Button: floating circle (cyan) with white play icon
+
+C. Today’s Missions (Horizontal Scroll)
+	•	Title: “Today’s Missions” (Inter 600, 18 px, #FFF)
+	•	Cards (bg #1E1E1E, radius 8 px):
+	•	Icon + label + XP reward badge (mint green)
+	•	“Start” text button in accent color
+
+D. Progress Snapshot
+	•	2×2 Grid of mini-cards (bg #1E1E1E):
+	1.	Streak – flame icon + “4 Days”
+	2.	XP This Week – bolt icon + “120 XP”
+	3.	Cohort Tier – “Scholar Circle” badge
+	4.	Badges – trophy icon + “3 Earned”
+
+E. Quick Launch Tiles
+	•	Grid of 3-columns: icon + label for Audio, Visual, Quiz, Cohort, Challenges, Curriculum, BEYOND
+	•	Tiles: bg #2A2A2A, radius 8 px, icon in cyan, label in #FFF
+
+F. Bottom Tab Bar
+	•	BG: #1E1E1E, border-top #333
+	•	Icons + Labels (Inter 300, 12 px):
+	•	Home (filled cyan pill behind icon)
+	•	Audio, Visual, Quiz, Cohort, Rewards (outline icons #AAA inactive)
+
+⸻
+
+📍 User Flow Path
+	1.	App Launch → Splash (#1)
+	2.	Splash → Welcome (#2)
+	3.	Get Started → Sign-Up (#3)
+	4.	Sign-Up → Profile Setup (#4)
+	5.	Profile → Plan Picker (#5)
+	6.	Plan → Mini Loader (#6)
+	7.	Loader → Dashboard (#7)
+
+From the Dashboard, every card/button deep-links:
+	•	Next Best Action → /audio/:id
+	•	Missions → Visual or Quiz screens
+	•	Tiles → module roots
+	•	Tab Bar → primary modules at any time
+	•	Menu (≡) → Profile, Settings, Help, Logout
+
+⸻
+
+Visual Polish Tips
+	•	Depth: Card shadows (0 4px 8px rgba(0,0,0,0.5))
+	•	Accent Pop: Secondary accent (e.g., coral) for CTAs like “Go Pro” and “Claim”
+	•	Motion: Subtle slide-ins and hover glows
+	•	Consistency: 8 px radius, 16 px padding everywhere
