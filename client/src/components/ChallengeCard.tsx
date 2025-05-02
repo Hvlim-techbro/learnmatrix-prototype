@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Check, Trophy, Calendar, Target, Clock, Zap } from 'lucide-react';
+import { Check, Trophy, Clock, Zap, Award } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Challenge } from '@shared/schema';
 import { IconMap } from '@/lib/gamification';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 type ChallengeCardProps = {
   challenge: Challenge;
@@ -13,7 +15,7 @@ export default function ChallengeCard({ challenge }: ChallengeCardProps) {
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = useState(false);
   
-  const Icon = IconMap[challenge.type === 'daily' ? 'tasks' : 'highlighter'];
+  const Icon = IconMap[challenge.type === 'daily' ? 'tasks' : 'highlighter'] || Award;
   
   const updateProgressMutation = useMutation({
     mutationFn: async (progress: number) => {
@@ -22,6 +24,7 @@ export default function ChallengeCard({ challenge }: ChallengeCardProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/challenges/daily'] });
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      setIsUpdating(false);
     },
   });
   
@@ -48,61 +51,90 @@ export default function ChallengeCard({ challenge }: ChallengeCardProps) {
     return `${Math.round(hoursRemaining / 24)} days`;
   };
   
-  // Get the gradient for the challenge type
-  const getChallengeGradient = () => {
+  // Get the gradient and glow for the challenge type
+  const getChallengeStyle = () => {
     switch (challenge.type) {
       case 'daily':
-        return 'bg-gradient-purple';
+        return { gradient: 'bg-gradient-purple', glow: 'glow-secondary' };
       case 'weekly':
-        return 'bg-gradient-blue';
+        return { gradient: 'bg-gradient-blue', glow: 'glow-primary' };
       case 'cohort':
-        return 'bg-gradient-green';
+        return { gradient: 'bg-gradient-green', glow: 'glow-green' };
       case 'seasonal':
-        return 'bg-gradient-yellow';
+        return { gradient: 'bg-gradient-yellow', glow: 'glow-yellow' };
       default:
-        return 'bg-gradient-primary';
+        return { gradient: 'bg-gradient-primary', glow: 'glow-primary' };
     }
   };
   
-  const gradient = getChallengeGradient();
+  const { gradient, glow } = getChallengeStyle();
+  
+  const progressPercentage = (challenge.progress / challenge.target) * 100;
   
   return (
-    <div className="glass rounded-2xl-custom p-4 shadow-custom-md transition-all duration-300 hover:shadow-custom-lg relative overflow-hidden">
-      {/* Progress indicator */}
-      <div 
-        className={`absolute bottom-0 left-0 h-1 ${isCompleted ? 'bg-gradient-green' : gradient} transition-all duration-500 ease-out z-10`}
-        style={{ width: `${(challenge.progress / challenge.target) * 100}%` }}
-      ></div>
+    <motion.div 
+      className="bg-[#111] border border-[#222] rounded-xl p-4 shadow-md relative overflow-hidden group"
+      whileHover={{ y: -5, scale: 1.02 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+    >
+      {/* Progress indicator with animation */}
+      <motion.div 
+        className={cn(
+          "absolute bottom-0 left-0 h-1",
+          isCompleted ? 'bg-gradient-green' : gradient
+        )}
+        initial={{ width: 0 }}
+        animate={{ width: `${progressPercentage}%` }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      ></motion.div>
       
-      {/* Background decoration */}
-      <div className={`absolute -right-10 -top-10 w-24 h-24 rounded-full opacity-10 blur-xl ${gradient}`}></div>
+      {/* Background subtle accent */}
+      <div className={cn(
+        "absolute -right-10 -top-10 w-32 h-32 rounded-full opacity-5 blur-xl",
+        gradient
+      )}></div>
+      
+      {/* Subtle glow on completion */}
+      {isCompleted && (
+        <div className={cn(
+          "absolute inset-0 opacity-10 rounded-xl",
+          "glow-green"  
+        )}></div>
+      )}
       
       <div className="flex items-start justify-between relative z-0">
         <div className="flex">
-          <div className={`${gradient} w-10 h-10 rounded-lg shadow-custom-sm flex items-center justify-center mr-3 flex-shrink-0`}>
+          <motion.div 
+            className={cn(
+              "w-10 h-10 rounded-lg shadow-md flex items-center justify-center mr-3 flex-shrink-0",
+              gradient
+            )}
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
+          >
             <Icon className="h-5 w-5 text-white" />
-          </div>
+          </motion.div>
           
           <div>
-            <h4 className="font-semibold">{challenge.title}</h4>
-            <p className="text-xs text-neutral-darker mt-1">{challenge.description}</p>
+            <h4 className="font-semibold text-white">{challenge.title}</h4>
+            <p className="text-xs text-[#888] mt-1">{challenge.description}</p>
             
-            <div className="flex mt-2 space-x-3">
-              <div className="flex items-center text-xs text-neutral-darker">
-                <Zap className="h-3 w-3 mr-1 text-accent-yellow" />
+            <div className="flex mt-2 space-x-4">
+              <div className="flex items-center text-xs text-[#888]">
+                <Zap className="h-3 w-3 mr-1 text-[hsl(var(--accent-yellow))]" />
                 <span>+{challenge.xpReward} XP</span>
               </div>
               
               {challenge.badgeReward && (
-                <div className="flex items-center text-xs text-neutral-darker">
-                  <Trophy className="h-3 w-3 mr-1 text-accent-yellow" />
+                <div className="flex items-center text-xs text-[#888]">
+                  <Trophy className="h-3 w-3 mr-1 text-[hsl(var(--accent-yellow))]" />
                   <span>Badge</span>
                 </div>
               )}
               
               {challenge.expiresAt && (
-                <div className="flex items-center text-xs text-neutral-darker">
-                  <Clock className="h-3 w-3 mr-1" />
+                <div className="flex items-center text-xs text-[#888]">
+                  <Clock className="h-3 w-3 mr-1 text-[#888]" />
                   <span>{getTimeRemaining()}</span>
                 </div>
               )}
@@ -110,21 +142,24 @@ export default function ChallengeCard({ challenge }: ChallengeCardProps) {
           </div>
         </div>
         
-        <button 
-          className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium flex items-center shadow-custom-sm transition-all duration-300 ${
+        <motion.button 
+          className={cn(
+            "flex-shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium flex items-center shadow-md transition-all",
             isCompleted 
               ? 'bg-gradient-green text-white' 
               : challenge.progress > 0 
-                ? 'glass text-neutral-darker' 
-                : 'bg-gradient-primary text-white hover:shadow-custom-md'
-          }`}
+                ? 'bg-[#222] text-[#888] hover:bg-[#333]' 
+                : `${gradient} text-white`
+          )}
           onClick={handleStartChallenge}
           disabled={isCompleted || isUpdating}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           {isCompleted && <Check className="h-4 w-4 mr-1" />}
           {isUpdating ? 'Updating...' : progressText}
-        </button>
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 }
