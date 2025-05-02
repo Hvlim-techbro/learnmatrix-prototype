@@ -1,0 +1,57 @@
+The User Profile Page for LearnMatrix could serve as a comprehensive overview of a learner’s progress, achievements, and personalization options. Here’s how it might look:
+
+⸻
+
+1. Profile Header
+	•	Avatar/Profile Picture: Customizable avatar or uploaded photo.
+	•	User Name: Displayed prominently.
+	•	Current Tier: Show the learner’s current Cohort Engine tier (e.g., Novice Nexus, Scholar Circle).
+	•	XP/Points Balance: Total points accumulated through activities (displayed with a progress bar).
+	•	Current Learning Path: Show the user’s active learning track (e.g., Engineering, Law, Life Skills).
+
+⸻
+
+2. Learning Stats
+	•	Current Course/Module: The learner’s current module or track within LearnMatrix.
+	•	Completion Progress: A progress bar indicating the percentage of completed lessons or modules.
+	•	Quiz Performance: Overview of quiz results (e.g., average score, best performance).
+	•	Achievements: Badges or trophies awarded for reaching milestones.
+	•	Time Spent: Total time spent in the platform (to track study hours).
+
+⸻
+
+3. Cohort and Community
+	•	Cohort Info: Show the user’s assigned cohort, tier, and group activity summary (e.g., recent discussions, cohort ranking).
+	•	Mentor or Peer Role: Indicate if the learner is acting as a mentor or has received any mentoring feedback.
+	•	Leaderboard Status: Display the user’s position in community challenges, if applicable.
+	•	Community Engagement: Quick overview of the learner’s interactions within the cohort (e.g., comments, help offered, challenges completed).
+
+⸻
+
+4. Reward Shop Overview
+	•	Points Balance: Display current points or in-app currency available.
+	•	Shop Link: A button or link that directs to the Reward Shop.
+	•	Recent Rewards: Quick preview of the last few items redeemed or unlocked.
+
+⸻
+
+5. Profile Customization
+	•	Personal Information: Basic details like name, educational focus (e.g., “Bachelor’s in Computer Science”), and location.
+	•	Theme/Appearance: Option to change profile theme, color scheme, and background.
+	•	Voice & Humor Settings: A section to manage preferences for voice tones and humor levels in AI Visual Tutor or Audio Tutor.
+	•	Bio/Tagline: A short personalized description or slogan.
+
+⸻
+
+6. Recent Activity Feed
+	•	Learning Activity: Recent courses, lessons, or quizzes attempted.
+	•	Cohort Contributions: If the user led discussions or assisted peers.
+	•	Leaderboards & Challenges: Display recent rankings or performance in community challenges and quiz battle arenas.
+	•	Upcoming Events: Any upcoming live sessions or cohort events the user is registered for.
+
+⸻
+
+7. Settings & Notifications
+	•	Notifications: Display and manage recent notifications about new content, achievements, and cohort events.
+	•	Privacy Settings: Options to control what others see in the profile (public vs. private).
+	•	Account Settings: Link to manage account, subscription, or app preferences.
