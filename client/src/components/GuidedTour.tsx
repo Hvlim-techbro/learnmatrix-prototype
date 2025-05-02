@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -78,7 +77,6 @@ export default function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
   const [learningStyle, setLearningStyle] = useState('');
   const [voiceStyle, setVoiceStyle] = useState('');
   const [humorLevel, setHumorLevel] = useState([50]);
-  const [_, navigate] = useLocation();
   
   // Reset to first step when opened
   useEffect(() => {
@@ -93,7 +91,7 @@ export default function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
     } else {
       // Last step - complete onboarding
       onClose();
-      navigate('/home');
+      // No navigation, we just close the dialog
     }
   };
 
