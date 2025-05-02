@@ -106,10 +106,15 @@ export default function CohortEngine() {
                 w-10 h-10 rounded-full border-2 border-black text-white flex items-center justify-center text-xs font-medium mr-2 shadow-md`}
               whileHover={{ scale: 1.15, y: -3 }}
               whileTap={{ scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
               initial={{ opacity: 0, scale: 0.8, x: -10 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
+              transition={{ 
+                type: 'spring', 
+                stiffness: 400, 
+                damping: 10,
+                duration: 0.3, 
+                delay: index * 0.1 
+              }}
             >
               {member.initials}
             </motion.div>
@@ -120,10 +125,15 @@ export default function CohortEngine() {
               className="bg-gradient-secondary w-10 h-10 rounded-full border-2 border-black text-white flex items-center justify-center text-xs font-medium shadow-md"
               whileHover={{ scale: 1.15, y: -3 }}
               whileTap={{ scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: cohortMembers.length * 0.1 }}
+              transition={{ 
+                type: 'spring', 
+                stiffness: 400, 
+                damping: 10,
+                duration: 0.3, 
+                delay: cohortMembers.length * 0.1 
+              }}
             >
               +{cohort.memberCount - cohortMembers.length}
             </motion.div>
