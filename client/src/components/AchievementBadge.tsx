@@ -7,57 +7,47 @@ type AchievementBadgeProps = {
 };
 
 export default function AchievementBadge({ badge, size = 'md' }: AchievementBadgeProps) {
-  // Map badge icon string to component
-  const getIconComponent = (iconName: string) => {
-    const iconMap: Record<string, React.ElementType> = {
-      'fire': Fire,
-      'zap': Zap,
-      'trophy': Trophy,
-      'award': Award,
-      'medal': Medal,
-      'star': Star
-    };
-    
-    return iconMap[iconName] || Award;
-  };
-  
-  const IconComponent = getIconComponent(badge.icon);
-  
-  // Map badge color string to gradient class
-  const getGradientClass = (color: string) => {
-    const gradientMap: Record<string, string> = {
-      'primary': 'bg-gradient-primary',
-      'secondary': 'bg-gradient-secondary',
-      'accent-blue': 'bg-gradient-blue',
-      'accent-purple': 'bg-gradient-purple',
-      'accent-green': 'bg-gradient-green',
-      'accent-yellow': 'bg-gradient-yellow'
-    };
-    
-    return gradientMap[color] || 'bg-gradient-primary';
-  };
-  
-  const gradientClass = getGradientClass(badge.color);
-  
-  // Size classes
-  const sizeClasses = {
-    sm: {
-      container: 'w-16 h-16',
-      icon: 'h-6 w-6'
-    },
-    md: {
-      container: 'w-20 h-20',
-      icon: 'h-8 w-8'
-    },
-    lg: {
-      container: 'w-24 h-24',
-      icon: 'h-10 w-10'
+  // Get the appropriate Lucide icon component based on the icon name
+  const getIcon = () => {
+    switch(badge.icon) {
+      case 'fire': return <Flame />;
+      case 'zap': return <Zap />;
+      case 'trophy': return <Trophy />;
+      case 'medal': return <Medal />;
+      case 'star': return <Star />;
+      default: return <Award />;
     }
   };
   
+  // Map badge color string to gradient class
+  const getGradientClass = () => {
+    switch(badge.color) {
+      case 'primary': return 'bg-gradient-primary';
+      case 'secondary': return 'bg-gradient-secondary';
+      case 'accent-blue': return 'bg-gradient-blue';
+      case 'accent-purple': return 'bg-gradient-purple';
+      case 'accent-green': return 'bg-gradient-green';
+      case 'accent-yellow': return 'bg-gradient-yellow';
+      default: return 'bg-gradient-primary';
+    }
+  };
+  
+  // Size classes
+  const getSizeClasses = () => {
+    switch(size) {
+      case 'sm': return { container: 'w-16 h-16', icon: 'h-6 w-6' };
+      case 'md': return { container: 'w-20 h-20', icon: 'h-8 w-8' };
+      case 'lg': return { container: 'w-24 h-24', icon: 'h-10 w-10' };
+      default: return { container: 'w-20 h-20', icon: 'h-8 w-8' };
+    }
+  };
+  
+  const sizeClasses = getSizeClasses();
+  const gradientClass = getGradientClass();
+  
   return (
     <div className="flex flex-col items-center">
-      <div className={`${sizeClasses[size].container} rounded-full ${gradientClass} flex items-center justify-center shadow-custom-md mb-2 relative overflow-hidden animate-bounce-subtle`}>
+      <div className={`${sizeClasses.container} rounded-full ${gradientClass} flex items-center justify-center shadow-custom-md mb-2 relative overflow-hidden animate-bounce-subtle`}>
         {/* Background pattern for more visual interest */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute -top-4 -left-4 w-8 h-8 rounded-full bg-white"></div>
@@ -66,7 +56,9 @@ export default function AchievementBadge({ badge, size = 'md' }: AchievementBadg
         </div>
         
         {/* Icon */}
-        <IconComponent className={`${sizeClasses[size].icon} text-white relative z-10`} />
+        <div className={`${sizeClasses.icon} text-white relative z-10`}>
+          {getIcon()}
+        </div>
         
         {/* Subtle rim for 3D effect */}
         <div className="absolute inset-0 border border-white/20 rounded-full"></div>
