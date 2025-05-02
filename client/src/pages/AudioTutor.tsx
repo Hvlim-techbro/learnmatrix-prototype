@@ -33,70 +33,118 @@ export default function AudioTutor() {
   const progressPercentage = (currentTime / currentLesson.duration) * 100;
   
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">AI Audio Tutor</h2>
-        <p className="text-neutral-darker">Listen and learn at your own pace</p>
-      </div>
+    <div className="p-6 bg-black min-h-[calc(100vh-8rem)]">
+      <motion.div 
+        className="mb-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <h2 className="text-2xl font-bold mb-2 text-white">AI Audio Tutor</h2>
+        <p className="text-[#888]">Listen and learn at your own pace</p>
+      </motion.div>
       
       {/* Currently Playing */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-white rounded-2xl p-6 shadow-sm border border-neutral mb-6"
+        className="bg-[#111] rounded-xl p-6 shadow-md border border-[#333] mb-6"
+        whileHover={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}
       >
-        <h3 className="font-semibold mb-4">Now Playing</h3>
-        <div className="flex items-center mb-4">
-          <div className="bg-primary rounded-xl w-16 h-16 flex items-center justify-center text-white text-2xl mr-4">
+        <h3 className="font-semibold mb-4 text-white">Now Playing</h3>
+        <div className="flex items-center mb-6">
+          <motion.div 
+            className="bg-gradient-blue rounded-xl w-16 h-16 flex items-center justify-center text-white text-2xl mr-4 shadow-lg"
+            whileHover={{ scale: 1.05 }}
+            animate={{ 
+              boxShadow: ['0 0 0 rgba(59, 130, 246, 0)', '0 0 20px rgba(59, 130, 246, 0.5)', '0 0 0 rgba(59, 130, 246, 0)'] 
+            }}
+            transition={{ 
+              boxShadow: { repeat: Infinity, duration: 2 }, 
+              scale: { type: 'spring', stiffness: 300, damping: 10 } 
+            }}
+          >
             <MicrophoneStage />
-          </div>
+          </motion.div>
           <div>
-            <h4 className="font-medium">{currentLesson.title}</h4>
-            <p className="text-sm text-neutral-darker">Part 2 of 5 • {formatTime(currentLesson.duration)}</p>
+            <h4 className="font-medium text-white">{currentLesson.title}</h4>
+            <p className="text-sm text-[#888]">Part 2 of 5 • {formatTime(currentLesson.duration)}</p>
           </div>
         </div>
         
+        {/* Visualizer */}
+        <div className="flex h-8 items-end space-x-0.5 mb-4">
+          {Array.from({ length: 50 }).map((_, i) => {
+            // Create a wave pattern with Math.sin
+            const height = Math.abs(Math.sin((i + currentTime) * 0.2)) * 100;
+            const displayHeight = isPlaying ? height : height * 0.3;
+            
+            return (
+              <motion.div 
+                key={i}
+                className="w-0.5 bg-gradient-primary rounded-t"
+                style={{ height: `${displayHeight}%` }}
+                animate={{
+                  height: isPlaying ? `${displayHeight}%` : '10%', 
+                  opacity: isPlaying ? 1 : 0.5
+                }}
+                transition={{ duration: 0.2 }}
+              />
+            );
+          })}
+        </div>
+        
         {/* Progress Bar */}
-        <div className="mb-4">
-          <div className="h-1.5 bg-neutral-light rounded-full overflow-hidden">
+        <div className="mb-6">
+          <div className="h-2 bg-[#222] rounded-full overflow-hidden">
             <motion.div 
-              className="h-full bg-primary rounded-full"
+              className="h-full bg-gradient-blue rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercentage}%` }}
               transition={{ duration: 0.5 }}
             ></motion.div>
           </div>
-          <div className="flex justify-between text-xs text-neutral-darker mt-1">
+          <div className="flex justify-between text-xs text-[#888] mt-2">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(currentLesson.duration)}</span>
           </div>
         </div>
         
         {/* Controls */}
-        <div className="flex justify-between items-center">
-          <button className="text-neutral-darker text-xl">
+        <div className="flex justify-center items-center space-x-8">
+          <motion.button 
+            className="text-[#888] text-xl p-2"
+            whileHover={{ scale: 1.1, color: '#fff' }}
+            whileTap={{ scale: 0.95 }}
+          >
             <SkipBack className="h-6 w-6" />
-          </button>
-          <button 
-            className="bg-primary rounded-full w-12 h-12 flex items-center justify-center text-white text-lg"
+          </motion.button>
+          <motion.button 
+            className="bg-gradient-blue rounded-full w-14 h-14 flex items-center justify-center text-white text-lg shadow-lg glow-primary"
             onClick={() => setIsPlaying(!isPlaying)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             {isPlaying ? (
               <Pause className="h-6 w-6" />
             ) : (
-              <Play className="h-6 w-6" />
+              <Play className="h-6 w-6 ml-1" />
             )}
-          </button>
-          <button className="text-neutral-darker text-xl">
+          </motion.button>
+          <motion.button 
+            className="text-[#888] text-xl p-2"
+            whileHover={{ scale: 1.1, color: '#fff' }}
+            whileTap={{ scale: 0.95 }}
+          >
             <SkipForward className="h-6 w-6" />
-          </button>
+          </motion.button>
         </div>
       </motion.div>
       
       {/* Upcoming Episodes */}
       <div>
-        <h3 className="font-semibold mb-4">Up Next</h3>
+        <h3 className="font-semibold mb-4 text-white">Up Next</h3>
         <div className="space-y-3">
           {upcomingLessons.map((lesson, index) => (
             <motion.div 
@@ -104,14 +152,24 @@ export default function AudioTutor() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="bg-white rounded-xl p-4 shadow-sm border border-neutral flex items-center"
+              className="bg-[#111] rounded-xl p-4 shadow-md border border-[#222] flex items-center"
+              whileHover={{ y: -5, borderColor: '#333', backgroundColor: '#161616' }}
+              whileTap={{ scale: 0.98 }}
             >
-              <div className="bg-neutral-light rounded-lg w-10 h-10 flex items-center justify-center text-neutral-darker mr-3">
-                <Play className="h-4 w-4" />
-              </div>
+              <motion.div 
+                className="bg-[#222] rounded-lg w-10 h-10 flex items-center justify-center text-[#888] mr-4"
+                whileHover={{ 
+                  scale: 1.1, 
+                  backgroundColor: '#3B82F6', 
+                  color: '#fff' 
+                }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Play className="h-4 w-4 ml-0.5" />
+              </motion.div>
               <div>
-                <h4 className="font-medium">{lesson.title}</h4>
-                <p className="text-xs text-neutral-darker">Part {index + 3} of 5 • {formatTime(lesson.duration)}</p>
+                <h4 className="font-medium text-white">{lesson.title}</h4>
+                <p className="text-xs text-[#888]">Part {index + 3} of 5 • {formatTime(lesson.duration)}</p>
               </div>
             </motion.div>
           ))}
