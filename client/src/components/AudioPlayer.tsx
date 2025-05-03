@@ -300,21 +300,81 @@ export default function AudioPlayer({ audioUrl = DEFAULT_AUDIO_URL, onInterveneC
           else if (data.type === 'ai_response') {
             console.log('AI response received:', data.response);
             
-            // Generate a response URL (in a real app, this would be a URL to an audio file)
-            const responseMessage = `AI Response: ${data.response}`;
-            
-            if (onInterveneComplete) {
-              onInterveneComplete(responseMessage);
+            if (data.audioData) {
+              try {
+                // Convert base64 audio data to a Blob
+                const binaryData = atob(data.audioData);
+                const bytes = new Uint8Array(binaryData.length);
+                for (let i = 0; i < binaryData.length; i++) {
+                  bytes[i] = binaryData.charCodeAt(i);
+                }
+                
+                // Create blob and URL
+                const audioBlob = new Blob([bytes.buffer], { type: 'audio/mp3' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                // Create a new Howl instance for the AI response
+                const aiSound = new Howl({
+                  src: [audioUrl],
+                  format: ['mp3'],
+                  html5: true,
+                  autoplay: false,
+                  onend: () => {
+                    // Clean up the URL object when done playing
+                    URL.revokeObjectURL(audioUrl);
+                    
+                    // Resume the original audio playback
+                    if (soundRef.current) {
+                      soundRef.current.play();
+                    }
+                  },
+                  onload: () => {
+                    console.log('AI response audio loaded, playing now...');
+                    aiSound.play();
+                  },
+                  onloaderror: (id, error) => {
+                    console.error('Error loading AI response audio:', error);
+                    // Fall back to text display
+                    if (onInterveneComplete) {
+                      onInterveneComplete(`AI Response: ${data.response}`);
+                    }
+                    // Resume original playback
+                    if (soundRef.current) {
+                      soundRef.current.play();
+                    }
+                  }
+                });
+                
+                // Store the AI response in intervention history
+                if (onInterveneComplete) {
+                  onInterveneComplete(`AI Response (audio playing): ${data.response}`);
+                }
+              } catch (error) {
+                console.error('Error processing audio data:', error);
+                // Fall back to text display
+                if (onInterveneComplete) {
+                  onInterveneComplete(`AI Response: ${data.response}`);
+                }
+                // Resume original playback
+                if (soundRef.current) {
+                  soundRef.current.play();
+                }
+              }
+            } else {
+              // No audio data, just use the text response
+              if (onInterveneComplete) {
+                onInterveneComplete(`AI Response: ${data.response}`);
+              }
+              
+              // Resume original playback
+              if (soundRef.current) {
+                soundRef.current.play();
+              }
             }
             
             setIsIntervening(false);
             setRecordingTime(0);
             setRecordingProgress(0);
-            
-            // Resume playback
-            if (soundRef.current) {
-              soundRef.current.play();
-            }
           }
           else if (data.type === 'error') {
             console.error('Error from server:', data.message);

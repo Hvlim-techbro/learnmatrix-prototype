@@ -60,25 +60,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 transcript: transcription.text 
               }));
               
-              // Now, generate a response using GPT-4
+              // Get the current module name (this would come from your application context in a real app)
+              const moduleName = "Neural Networks and Deep Learning";
+              
+              // Now, generate a response using GPT-4 with Host A & Host B personas
               const gptResponse = await openai.chat.completions.create({
                 model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
                 messages: [
-                  { role: "system", content: "You are an AI tutor helping a student learn. Provide a brief, helpful response to their question." },
-                  { role: "user", content: transcription.text }
+                  { 
+                    role: "system", 
+                    content: "You are two co-hosts on an educational podcast discussing a topic in depth. Host A is clear and concise; Host B is friendly and humorous. Always refer back to each other by name ('Host A: …', 'Host B: …')." 
+                  },
+                  { 
+                    role: "user", 
+                    content: `Module: ${moduleName}\nLearner asked: ${transcription.text}\nContinue the discussion.` 
+                  }
                 ],
-                max_tokens: 150
+                max_tokens: 300
               });
               
               const responseText = gptResponse.choices[0].message.content;
               console.log('AI response:', responseText);
               
-              // Send the AI response back to the client
-              if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ 
-                  type: 'ai_response', 
-                  response: responseText 
-                }));
+              // Generate audio from the text using OpenAI's TTS
+              try {
+                const audioResponse = await openai.audio.speech.create({
+                  model: "tts-1",
+                  voice: "alloy", // Choose from 'alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'
+                  input: responseText || '',
+                });
+                
+                // Convert to buffer
+                const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
+                
+                // Save to a temporary file
+                const tempAudioPath = path.join(process.cwd(), `temp_response_${Date.now()}.mp3`);
+                fs.writeFileSync(tempAudioPath, audioBuffer);
+                
+                // Read the file and convert to base64
+                const audioBase64 = fs.readFileSync(tempAudioPath).toString('base64');
+                
+                // Send both text and audio data back to the client
+                if (ws.readyState === WebSocket.OPEN) {
+                  ws.send(JSON.stringify({ 
+                    type: 'ai_response', 
+                    response: responseText,
+                    audioData: audioBase64
+                  }));
+                }
+                
+                // Clean up the temporary file
+                fs.unlinkSync(tempAudioPath);
+                
+              } catch (error) {
+                console.error('Error generating TTS:', error);
+                // Fallback to just sending the text response if TTS fails
+                if (ws.readyState === WebSocket.OPEN) {
+                  ws.send(JSON.stringify({ 
+                    type: 'ai_response', 
+                    response: responseText 
+                  }));
+                }
               }
             }
           } catch (error) {
@@ -182,7 +224,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if challenge is complete
       if (updatedChallenge.progress >= updatedChallenge.target) {
         // Award XP
-        await storage.updateUserXp(updatedChallenge.userId, updatedChallenge.xpReward);
+        const xpReward = updatedChallenge.xpReward || 10; // Default to 10 XP if not specified
+        await storage.updateUserXp(updatedChallenge.userId, xpReward);
         
         // Award badge if applicable
         if (updatedChallenge.badgeReward) {
