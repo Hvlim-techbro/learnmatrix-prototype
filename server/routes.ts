@@ -13,8 +13,11 @@ import {
   insertBadgeSchema 
 } from "@shared/schema";
 
-// Initialize OpenAI with API key from environment
+// Initialize OpenAI clients with API keys from environment
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Separate client for TTS operations
+const ttsOpenai = new OpenAI({ apiKey: process.env.TTS_OPENAI_API_KEY });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -24,6 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // WebSocket server for audio transcription
   const audioWss = new WebSocketServer({ server: httpServer, path: '/ws/audio' });
+  console.log('Audio WebSocket server initialized on path: /ws/audio');
   
   audioWss.on('connection', (ws) => {
     console.log('Audio WebSocket connection established');
@@ -90,7 +94,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Ensure we have valid text for TTS
               const ttsInput = responseText.trim() || 'I apologize, but I need more information to provide a helpful response.';
               
-              const audioResponse = await openai.audio.speech.create({
+              // Use the dedicated TTS OpenAI client
+              const audioResponse = await ttsOpenai.audio.speech.create({
                 model: "tts-1",
                 voice: "alloy",
                 input: ttsInput,
@@ -253,14 +258,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Challenge not found' });
       }
       
-      // Ensure TypeScript recognizes this as a valid Challenge with non-null fields
-      const xpToAward: number = typeof updatedChallenge.xpReward === 'number' ? updatedChallenge.xpReward : 10;
+      // Get XP reward amount from the challenge data or use default value
+      const xpToAward = Number(updatedChallenge.xpReward || 10); // Convert to number
       
       // Check if challenge is complete
       if (updatedChallenge.progress >= updatedChallenge.target) {
-        // Award XP
-        // Use our properly typed variable
-        await storage.updateUserXp(updatedChallenge.userId, xpToAward);
+        // Award XP to the user
+        const userId = Number(updatedChallenge.userId || 1); // Ensure userId is a number
+        await storage.updateUserXp(userId, xpToAward);
         
         // Award badge if applicable
         if (updatedChallenge.badgeReward) {
@@ -269,7 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             description: `Earned by completing the ${updatedChallenge.title} challenge`,
             icon: 'trophy',
             color: 'accent-yellow',
-            userId: updatedChallenge.userId
+            userId: Number(updatedChallenge.userId || 1) // Ensure we use a valid number
           });
         }
       }
