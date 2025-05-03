@@ -18,11 +18,143 @@
         display: flex;
         flex-direction: column;
       }
+      .app-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #121212;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        color: #3b82f6;
+      }
+      .input-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 4px;
+        color: #fff;
+      }
+      button {
+        width: 100%;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        padding: 12px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .error {
+        margin-top: 16px;
+        padding: 12px;
+        background-color: #7f1d1d;
+        color: white;
+        border-radius: 4px;
+      }
+      .transcript {
+        margin-top: 24px;
+      }
+      .transcript h2 {
+        margin-bottom: 12px;
+      }
+      .transcript-content {
+        padding: 16px;
+        background-color: #1e1e1e;
+        border-radius: 4px;
+        white-space: pre-wrap;
+      }
     </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="root">
+      <div class="app-container">
+        <h1>Audio Tutor</h1>
+        <div class="input-group">
+          <label for="topic">Enter a topic:</label>
+          <input type="text" id="topic" placeholder="What is chemistry?">
+        </div>
+        <button id="generate-btn">Generate Lesson</button>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="transcript" class="transcript" style="display: none;">
+          <h2>Transcript:</h2>
+          <div id="transcript-content" class="transcript-content"></div>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const topicInput = document.getElementById('topic');
+        const generateBtn = document.getElementById('generate-btn');
+        const errorElement = document.getElementById('error');
+        const transcriptElement = document.getElementById('transcript');
+        const transcriptContent = document.getElementById('transcript-content');
+        
+        generateBtn.addEventListener('click', async function() {
+          const topic = topicInput.value.trim();
+          
+          if (!topic) {
+            errorElement.textContent = 'Please enter a topic';
+            errorElement.style.display = 'block';
+            return;
+          }
+          
+          // Reset UI states
+          errorElement.style.display = 'none';
+          transcriptElement.style.display = 'none';
+          generateBtn.disabled = true;
+          generateBtn.textContent = 'Generating...';
+          
+          try {
+            const response = await fetch('/api/audio/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ topic })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+              throw new Error(data.error || 'Failed to generate lesson');
+            }
+            
+            if (data.transcript) {
+              transcriptContent.textContent = data.transcript;
+              transcriptElement.style.display = 'block';
+            }
+            
+            if (data.error) {
+              errorElement.textContent = data.error;
+              errorElement.style.display = 'block';
+            }
+            
+          } catch (error) {
+            console.error('Error:', error);
+            errorElement.textContent = error.message || 'Error generating lesson';
+            errorElement.style.display = 'block';
+          } finally {
+            generateBtn.disabled = false;
+            generateBtn.textContent = 'Generate Lesson';
+          }
+        });
+      });
+    </script>
+    
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>

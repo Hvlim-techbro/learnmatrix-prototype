@@ -10,6 +10,7 @@ import Home from "@/pages/Home";
 import Onboarding from "@/pages/Onboarding";
 import AudioTutor from "@/pages/AudioTutor";
 import AudioMvp from "@/pages/AudioMvp";
+import BasicAudioMvp from "@/pages/BasicAudioMvp";
 import VisualTutor from "@/pages/VisualTutor";
 import QuizBattle from "@/pages/QuizBattle";
 import CohortEngine from "@/pages/CohortEngine";
@@ -119,7 +120,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <div className="min-h-screen bg-black">
-          <AudioMvp />
+          <BasicAudioMvp />
         </div>
         <Toaster />
       </TooltipProvider>
