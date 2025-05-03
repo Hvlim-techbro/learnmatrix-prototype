@@ -217,68 +217,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Generating audio lesson for topic:', topic);
       
-      // Generate content using GPT-4o
-      const gptResponse = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are two co-hosts on an educational podcast discussing a topic in depth. Host A is clear, concise, and provides factual explanations; Host B is friendly, humorous, and adds relatable examples. Always refer back to each other by name ('Host A: …', 'Host B: …')."
-          },
-          {
-            role: "user",
-            content: `Module Topic: ${topic}\nCreate a 2-3 minute dialogue as Host A and Host B explaining this topic in an engaging and educational manner. Start by introducing the topic.`
-          }
-        ],
-        max_tokens: 800,
-        temperature: 0.7
-      });
+      // Mock data for fallback if needed
+      const mockLesson: {
+        title: string;
+        audioUrl: string | null;
+        transcript: string | null;
+        error?: string;
+      } = {
+        title: topic,
+        audioUrl: null,
+        transcript: null
+      };
       
-      // Extract the content from the response
-      const responseText = gptResponse.choices[0].message.content || 'I apologize, but I could not generate content for this topic.';
-      console.log('Generated text content:', responseText);
-      
-      // Generate speech audio from the text using TTS API
       try {
-        const audioResponse = await ttsOpenai.audio.speech.create({
-          model: "tts-1",
-          voice: "alloy",
-          input: responseText,
+        // Generate content using GPT-4o
+        const gptResponse = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are two co-hosts on an educational podcast discussing a topic in depth. Host A is clear, concise, and provides factual explanations; Host B is friendly, humorous, and adds relatable examples. Always refer back to each other by name ('Host A: …', 'Host B: …')."
+            },
+            {
+              role: "user",
+              content: `Module Topic: ${topic}\nCreate a 2-3 minute dialogue as Host A and Host B explaining this topic in an engaging and educational manner. Start by introducing the topic.`
+            }
+          ],
+          max_tokens: 800,
+          temperature: 0.7
         });
         
-        // Convert audio to buffer
-        const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
+        // Extract the content from the response
+        const responseText = gptResponse.choices[0].message.content || 'I apologize, but I could not generate content for this topic.';
+        console.log('Generated text content successfully');
         
-        // Create a unique filename
-        const audioFilename = `lesson_${Date.now()}.mp3`;
-        const audioPath = path.join(process.cwd(), 'public', audioFilename);
+        // Update mock data with the transcript
+        mockLesson.transcript = responseText;
         
-        // Ensure the public directory exists
-        if (!fs.existsSync(path.join(process.cwd(), 'public'))) {
-          fs.mkdirSync(path.join(process.cwd(), 'public'), { recursive: true });
+        // Generate speech audio from the text using TTS API
+        try {
+          const audioResponse = await ttsOpenai.audio.speech.create({
+            model: "tts-1",
+            voice: "alloy",
+            input: responseText,
+          });
+          
+          // Convert audio to buffer
+          const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
+          
+          // Create a unique filename
+          const audioFilename = `lesson_${Date.now()}.mp3`;
+          const audioPath = path.join(process.cwd(), 'public', audioFilename);
+          
+          // Ensure the public directory exists
+          if (!fs.existsSync(path.join(process.cwd(), 'public'))) {
+            fs.mkdirSync(path.join(process.cwd(), 'public'), { recursive: true });
+          }
+          
+          // Save audio to file
+          fs.writeFileSync(audioPath, audioBuffer);
+          
+          // Create a URL for the audio file
+          const audioUrl = `/public/${audioFilename}`;
+          mockLesson.audioUrl = audioUrl;
+          
+          console.log('Audio generation successful:', audioUrl);
+          
+          // Return the complete lesson data
+          return res.json({
+            title: topic,
+            audioUrl,
+            transcript: responseText
+          });
+          
+        } catch (ttsError: any) {
+          console.error('Error generating TTS:', ttsError);
+          // Continue with text-only fallback
+          if (typeof ttsError === 'object' && ttsError?.message && ttsError.message.includes('quota')) {
+            console.log('TTS quota exceeded, falling back to text-only');
+            return res.json({
+              title: topic,
+              transcript: responseText,
+              audioUrl: null,
+              error: "TTS quota exceeded, text-only response provided"
+            });
+          } else {
+            throw ttsError;
+          }
         }
         
-        // Save audio to file
-        fs.writeFileSync(audioPath, audioBuffer);
+      } catch (gptError: any) {
+        console.error('Error with GPT response:', gptError);
         
-        // Create a URL for the audio file
-        const audioUrl = `/public/${audioFilename}`;
-        
-        // Return the lesson data
-        return res.json({
-          title: topic,
-          audioUrl,
-          transcript: responseText
-        });
-        
-      } catch (ttsError) {
-        console.error('Error generating TTS:', ttsError);
-        return res.status(500).json({ error: 'Failed to generate audio for the lesson' });
+        // Provide fallback for rate limiting errors
+        if (typeof gptError === 'object' && gptError?.message && gptError.message.includes('quota')) {
+          console.log('GPT quota exceeded, using fallback content');
+          
+          // Define a fallback lesson script on the topic
+          const fallbackText = `Host A: Welcome to our educational podcast! Today, we'll be discussing ${topic}.
+
+Host B: That's right! This is a fascinating subject that many people are curious about.
+
+Host A: For starters, let's define what ${topic} means in simple terms. It's a subject that involves understanding the world around us.
+
+Host B: Exactly! And you know what I find interesting? How this topic connects to our everyday lives in ways we might not even realize.
+
+Host A: Let's break down some key concepts that our listeners should know about ${topic}.
+
+Host B: And I'll throw in some fun examples to make these concepts more relatable!`;
+          
+          mockLesson.transcript = fallbackText;
+          
+          return res.json({
+            title: topic,
+            transcript: fallbackText,
+            audioUrl: null,
+            error: "API quota exceeded, text-only fallback provided"
+          });
+        } else {
+          // For other errors, rethrow
+          throw gptError;
+        }
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating audio lesson:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      
+      // Provide a detailed error message based on the type of error
+      const errorMessage = typeof error === 'object' && error?.message ? error.message : 'Internal server error';
+      const statusCode = typeof error === 'object' && error?.status ? error.status : 500;
+      
+      return res.status(statusCode).json({ 
+        error: errorMessage,
+        details: typeof error === 'object' && error?.code ? error.code : 'unknown_error'
+      });
     }
   });
   

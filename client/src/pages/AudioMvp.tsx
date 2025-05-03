@@ -27,6 +27,10 @@ export default function AudioMvp() {
     setInterventionHistory(prev => [...prev, responseAudioUrl]);
   };
   
+  // State for transcript content and view
+  const [transcript, setTranscript] = useState<string>('');
+  const [showTranscript, setShowTranscript] = useState<boolean>(false);
+  
   const generateLesson = async () => {
     if (!topic.trim()) {
       toast({
@@ -38,6 +42,7 @@ export default function AudioMvp() {
     }
     
     setIsLoading(true);
+    setShowTranscript(false);
     toast({
       title: 'Generating lesson...',
       description: 'This may take a minute or two.',
@@ -50,47 +55,73 @@ export default function AudioMvp() {
         body: JSON.stringify({ topic: topic.trim() })
       });
       
-      if (!response.ok) {
-        throw new Error('Failed to generate lesson');
-      }
-      
       const data = await response.json();
-      setCurrentTitle(data.title);
-      setCurrentAudioUrl(data.audioUrl);
-      setShowPlayer(true);
       
-      // Create new Howl instance
-      if (audioRef.current) {
-        audioRef.current.unload();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate lesson');
       }
       
-      audioRef.current = new Howl({
-        src: [data.audioUrl],
-        html5: true,
-        autoplay: false,
-        onload: () => {
-          audioRef.current?.play();
-        },
-        onloaderror: (id, error) => {
-          console.error('Error loading audio:', error);
+      // Set the current title and transcript
+      setCurrentTitle(data.title);
+      setTranscript(data.transcript || '');
+      
+      // Check if we have audio or just text
+      if (data.audioUrl) {
+        setCurrentAudioUrl(data.audioUrl);
+        setShowPlayer(true);
+        
+        // Create new Howl instance for audio playback
+        if (audioRef.current) {
+          audioRef.current.unload();
+        }
+        
+        audioRef.current = new Howl({
+          src: [data.audioUrl],
+          html5: true,
+          autoplay: false,
+          onload: () => {
+            audioRef.current?.play();
+          },
+          onloaderror: (id, error) => {
+            console.error('Error loading audio:', error);
+            // Show transcript if audio fails
+            setShowTranscript(true);
+            toast({
+              title: 'Error loading audio',
+              description: 'Showing text transcript instead.',
+              variant: 'destructive'
+            });
+          }
+        });
+        
+        toast({
+          title: 'Lesson generated!',
+          description: `Playing lesson on: ${data.title}`,
+        });
+      } else {
+        // Handle text-only response (API quota exceeded)
+        setShowPlayer(false);
+        setShowTranscript(true);
+        
+        if (data.error && data.error.includes('quota')) {
           toast({
-            title: 'Error loading audio',
-            description: 'There was a problem loading the audio file.',
+            title: 'Text-only lesson generated',
+            description: 'API quota exceeded. Showing text transcript instead of audio.',
             variant: 'destructive'
           });
+        } else {
+          toast({
+            title: 'Lesson generated!',
+            description: `Reading lesson on: ${data.title}`,
+          });
         }
-      });
-      
-      toast({
-        title: 'Lesson generated!',
-        description: `Playing lesson on: ${data.title}`,
-      });
+      }
       
     } catch (error) {
       console.error('Error generating lesson:', error);
       toast({
         title: 'Error generating lesson',
-        description: 'There was a problem generating the lesson. Please try again.',
+        description: error instanceof Error ? error.message : 'There was a problem generating the lesson. Please try again.',
         variant: 'destructive'
       });
     } finally {
@@ -195,6 +226,35 @@ export default function AudioMvp() {
                   audioUrl={currentAudioUrl} 
                   onInterveneComplete={handleInterveneComplete} 
                 />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {/* Transcript display */}
+        <AnimatePresence>
+          {showTranscript && transcript && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="mb-8"
+            >
+              <div className="bg-[#121212] rounded-xl border border-[#333] p-6 shadow-lg">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+                    <MessageSquare className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-white/60">Lesson Transcript:</div>
+                    <h2 className="text-xl font-bold text-white">{currentTitle}</h2>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-4 bg-[#1E1E1E] rounded-lg border border-[#333] text-white/80">
+                  <div className="whitespace-pre-wrap">{transcript}</div>
+                </div>
               </div>
             </motion.div>
           )}
