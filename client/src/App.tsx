@@ -32,10 +32,10 @@ function Router() {
     const onboardingCompleted = localStorage.getItem("learnMatrixOnboardingCompleted");
     setHasCompletedOnboarding(!!onboardingCompleted);
     
-    // Clear the initial load state after checking
+    // Clear the initial load state after checking (give it more time to load)
     const timer = setTimeout(() => {
       setIsInitialLoad(false);
-    }, 100);
+    }, 500);
     
     return () => clearTimeout(timer);
   }, []);
@@ -50,17 +50,20 @@ function Router() {
     "/plan-selection"
   ].includes(location) && !hasCompletedOnboarding;
   
-  // Force localStorage check for testing
-  // Uncomment to force welcome flow regardless of localStorage
+  // Development helper - uncomment to test welcome flow
   // localStorage.removeItem("learnMatrixOnboardingCompleted");
 
   // Hide header and tab bar on welcome flow screens
   const showHeaderAndTabs = !isWelcomeFlowPage && location !== "/onboarding";
   
-  // Comment out this conditional to fix initial loading issues
-  // if (isInitialLoad && !hasCompletedOnboarding) {
-  //   return <SplashScreen />;
-  // }
+  // Show initial splash screen (but fix the previous loading issue)
+  if (isInitialLoad) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="w-20 h-20 rounded-full bg-gradient-primary animate-pulse-custom"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-black relative">
@@ -78,7 +81,7 @@ function Router() {
       <main className={`flex-1 overflow-y-auto ${showHeaderAndTabs ? 'pb-20 max-w-screen-lg w-full mx-auto' : 'w-full'} relative z-10`}>
         <Switch>
           {/* Welcome Flow Routes */}
-          <Route path="/" component={hasCompletedOnboarding ? Home : WelcomeScreen} />
+          <Route path="/" component={AudioMvp} />
           <Route path="/splash" component={SplashScreen} />
           <Route path="/welcome" component={WelcomeScreen} />
           <Route path="/signup" component={SignUp} />
