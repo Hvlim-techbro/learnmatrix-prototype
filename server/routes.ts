@@ -221,11 +221,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Challenge not found' });
       }
       
+      // Ensure TypeScript recognizes this as a valid Challenge with non-null fields
+      const xpToAward: number = typeof updatedChallenge.xpReward === 'number' ? updatedChallenge.xpReward : 10;
+      
       // Check if challenge is complete
       if (updatedChallenge.progress >= updatedChallenge.target) {
         // Award XP
-        const xpReward = updatedChallenge.xpReward || 10; // Default to 10 XP if not specified
-        await storage.updateUserXp(updatedChallenge.userId, xpReward);
+        // Use our properly typed variable
+        await storage.updateUserXp(updatedChallenge.userId, xpToAward);
         
         // Award badge if applicable
         if (updatedChallenge.badgeReward) {
