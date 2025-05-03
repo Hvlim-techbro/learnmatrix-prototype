@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useLocation } from 'wouter';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Headphones, MessageSquare, Mic, Settings } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Headphones, MessageSquare, Mic, Settings, Send, Loader2 } from 'lucide-react';
 import AudioPlayer from '@/components/AudioPlayer';
+import { Howl } from 'howler';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AudioMvp() {
   const [, setLocation] = useLocation();
