@@ -84,10 +84,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Generate audio from the text using OpenAI's TTS
               try {
+                // Ensure responseText is a valid string
+                const ttsInput = typeof responseText === 'string' && responseText.trim() ? responseText : 'I apologize, but I need more information to provide a helpful response.';
+                
                 const audioResponse = await openai.audio.speech.create({
                   model: "tts-1",
                   voice: "alloy", // Choose from 'alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'
-                  input: responseText || '',
+                  input: ttsInput,
                 });
                 
                 // Convert to buffer
