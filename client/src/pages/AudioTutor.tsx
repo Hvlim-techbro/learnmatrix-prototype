@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 export default function AudioTutor() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentTime, setCurrentTime] = useState(255); // 4:15 in seconds
+  const [, setLocation] = useLocation();
   
   const { data: lessons = [] } = useQuery<Lesson[]>({
     queryKey: ['/api/modules/1/lessons'],
@@ -42,8 +43,20 @@ export default function AudioTutor() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <h2 className="text-2xl font-bold mb-2 text-white">AI Audio Tutor</h2>
-        <p className="text-[#888]">Listen and learn at your own pace</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold mb-2 text-white">AI Audio Tutor</h2>
+            <p className="text-[#888]">Listen and learn at your own pace</p>
+          </div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              className="bg-gradient-purple hover:bg-purple-600 text-white"
+              onClick={() => setLocation('/audio-mvp')}
+            >
+              <Sparkles className="mr-2 h-4 w-4" /> Try MVP Version
+            </Button>
+          </motion.div>
+        </div>
       </motion.div>
       
       {/* Currently Playing */}

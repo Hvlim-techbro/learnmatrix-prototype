@@ -1,137 +1,110 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Howl } from 'howler';
-import { Play, Pause, SkipBack, SkipForward, Mic, X, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { toast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
+import { Play, Pause, VolumeX, Volume2, SkipForward, SkipBack, Mic, Send, X } from 'lucide-react';
+
+// Default audio URL for testing
+const DEFAULT_AUDIO_URL = 'https://file-examples.com/storage/fe9278ad7f642dbd39ac5c9/2017/11/file_example_MP3_700KB.mp3';
 
 type AudioPlayerProps = {
   audioUrl?: string;
   onInterveneComplete?: (responseAudioUrl: string) => void;
 };
 
-const DEFAULT_AUDIO_URL = 'https://s3.amazonaws.com/cdn01.ituneweekly.com/1990-podcast-demo.mp3';
-
 export default function AudioPlayer({ audioUrl = DEFAULT_AUDIO_URL, onInterveneComplete }: AudioPlayerProps) {
+  // Player state
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [duration, setDuration] = useState(0);
-  const [seek, setSeek] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [volume, setVolume] = useState(0.8);
+  const [isMuted, setIsMuted] = useState(false);
+  const [progress, setProgress] = useState(0);
+  
+  // Intervention state
+  const [isIntervening, setIsIntervening] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [volume, setVolume] = useState(0.8);
+  const [recordingProgress, setRecordingProgress] = useState(0);
+  const recordingRef = useRef<any>(null);
+  const recordingTimerRef = useRef<any>(null);
   
+  // Sound instance ref
   const soundRef = useRef<Howl | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const seekIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const socketRef = useRef<WebSocket | null>(null);
+  const progressTimerRef = useRef<number | null>(null);
   
-  // Set up Howler instance
+  // Max recording duration in seconds
+  const MAX_RECORDING_DURATION = 8;
+  
+  // Initialize sound
   useEffect(() => {
-    // Cleanup previous sound instance
     if (soundRef.current) {
       soundRef.current.unload();
     }
     
-    // Create new sound instance
-    soundRef.current = new Howl({
+    const sound = new Howl({
       src: [audioUrl],
       html5: true,
-      volume: volume,
+      preload: true,
+      volume: isMuted ? 0 : volume,
       onload: () => {
-        setIsLoading(false);
-        setDuration(soundRef.current?.duration() || 0);
+        setDuration(sound.duration());
       },
       onplay: () => {
         setIsPlaying(true);
-        startSeekInterval();
+        startProgressTimer();
       },
       onpause: () => {
         setIsPlaying(false);
-        clearSeekInterval();
+        stopProgressTimer();
       },
       onstop: () => {
         setIsPlaying(false);
-        setSeek(0);
-        clearSeekInterval();
+        stopProgressTimer();
+        setCurrentTime(0);
+        setProgress(0);
       },
       onend: () => {
         setIsPlaying(false);
-        setSeek(0);
-        clearSeekInterval();
-      },
-      onseek: () => {
-        setSeek(soundRef.current?.seek() || 0);
-      },
+        stopProgressTimer();
+        setCurrentTime(0);
+        setProgress(0);
+      }
     });
+    
+    soundRef.current = sound;
     
     return () => {
       if (soundRef.current) {
         soundRef.current.unload();
       }
-      clearSeekInterval();
+      stopProgressTimer();
     };
   }, [audioUrl]);
   
-  // Update volume when it changes
-  useEffect(() => {
-    if (soundRef.current) {
-      soundRef.current.volume(volume);
-    }
-  }, [volume]);
-  
-  // Handle timer for recording countdown
-  useEffect(() => {
-    if (isRecording) {
-      recordingTimerRef.current = setInterval(() => {
-        setRecordingTime(prev => {
-          if (prev >= 8000) {
-            stopRecording();
-            return 0;
-          }
-          return prev + 100;
-        });
-      }, 100);
-    } else {
-      if (recordingTimerRef.current) {
-        clearInterval(recordingTimerRef.current);
-        recordingTimerRef.current = null;
-      }
+  // Start/stop progress timer
+  const startProgressTimer = () => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
     }
     
-    return () => {
-      if (recordingTimerRef.current) {
-        clearInterval(recordingTimerRef.current);
-      }
-    };
-  }, [isRecording]);
-  
-  const startSeekInterval = () => {
-    clearSeekInterval();
-    seekIntervalRef.current = setInterval(() => {
+    progressTimerRef.current = window.setInterval(() => {
       if (soundRef.current) {
-        setSeek(soundRef.current.seek());
+        const current = soundRef.current.seek();
+        setCurrentTime(current);
+        setProgress(Math.floor((current / duration) * 100) || 0);
       }
-    }, 1000);
+    }, 100) as unknown as number;
   };
   
-  const clearSeekInterval = () => {
-    if (seekIntervalRef.current) {
-      clearInterval(seekIntervalRef.current);
-      seekIntervalRef.current = null;
+  const stopProgressTimer = () => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
     }
   };
   
-  const formatTime = (secs: number) => {
-    const minutes = Math.floor(secs / 60) || 0;
-    const seconds = Math.floor(secs - minutes * 60) || 0;
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
-  
-  const handlePlay = () => {
+  // Player controls
+  const togglePlay = () => {
     if (!soundRef.current) return;
     
     if (isPlaying) {
@@ -141,340 +114,316 @@ export default function AudioPlayer({ audioUrl = DEFAULT_AUDIO_URL, onInterveneC
     }
   };
   
-  const handleStop = () => {
+  const toggleMute = () => {
     if (!soundRef.current) return;
-    soundRef.current.stop();
-  };
-  
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    setSeek(value);
-    if (soundRef.current) {
-      soundRef.current.seek(value);
-    }
-  };
-  
-  const jumpForward = () => {
-    if (!soundRef.current) return;
-    const currentSeek = soundRef.current.seek();
-    const newSeek = Math.min(currentSeek + 10, soundRef.current.duration());
-    soundRef.current.seek(newSeek);
-    setSeek(newSeek);
-  };
-  
-  const jumpBackward = () => {
-    if (!soundRef.current) return;
-    const currentSeek = soundRef.current.seek();
-    const newSeek = Math.max(currentSeek - 10, 0);
-    soundRef.current.seek(newSeek);
-    setSeek(newSeek);
+    
+    const newMuteState = !isMuted;
+    setIsMuted(newMuteState);
+    soundRef.current.volume(newMuteState ? 0 : volume);
   };
   
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
+    if (!soundRef.current) return;
+    
+    const value = parseFloat(e.target.value);
+    setVolume(value);
+    if (!isMuted) {
+      soundRef.current.volume(value);
+    }
   };
   
-  // Intervene functionality
-  const startRecording = async () => {
-    if (isRecording) return;
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!soundRef.current) return;
     
-    // Pause current playback
+    const value = parseInt(e.target.value, 10);
+    const newTime = (value / 100) * duration;
+    soundRef.current.seek(newTime);
+    setProgress(value);
+    setCurrentTime(newTime);
+  };
+  
+  const skip = (direction: 'forward' | 'backward') => {
+    if (!soundRef.current) return;
+    
+    const currentSeek = soundRef.current.seek() as number;
+    const skipAmount = 10; // Skip 10 seconds
+    
+    let newTime = direction === 'forward' ? 
+      Math.min(currentSeek + skipAmount, duration) : 
+      Math.max(currentSeek - skipAmount, 0);
+    
+    soundRef.current.seek(newTime);
+    setCurrentTime(newTime);
+    setProgress(Math.floor((newTime / duration) * 100));
+  };
+  
+  // Format time from seconds to MM:SS
+  const formatTime = (seconds: number) => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  // Intervention functionality
+  const handleInterveneStart = () => {
     if (soundRef.current && isPlaying) {
       soundRef.current.pause();
     }
-    
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioChunksRef.current = [];
-      
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      
-      mediaRecorder.addEventListener('dataavailable', (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      });
-      
-      mediaRecorder.addEventListener('stop', () => {
-        processRecording();
-        
-        // Stop all tracks on the stream
-        stream.getTracks().forEach(track => track.stop());
-      });
-      
-      // Start recording
-      mediaRecorder.start();
-      setIsRecording(true);
-      setRecordingTime(0);
-      
-      toast({
-        title: "Recording started",
-        description: "Speak now. Recording will automatically stop after 8 seconds.",
-      });
-    } catch (error) {
-      console.error('Error accessing microphone:', error);
-      toast({
-        title: "Microphone error",
-        description: "Could not access your microphone. Please check permissions.",
-        variant: "destructive"
-      });
+    setIsIntervening(true);
+  };
+  
+  const handleCancelIntervene = () => {
+    if (isRecording) {
+      stopRecording();
     }
+    setIsIntervening(false);
+    setRecordingTime(0);
+    setRecordingProgress(0);
+  };
+  
+  const startRecording = () => {
+    setIsRecording(true);
+    setRecordingTime(0);
+    setRecordingProgress(0);
+    
+    // In a real implementation, we would use the MediaRecorder API
+    // For this MVP, we'll simulate recording with a timer
+    recordingTimerRef.current = setInterval(() => {
+      setRecordingTime(prev => {
+        const newTime = prev + 0.1;
+        setRecordingProgress((newTime / MAX_RECORDING_DURATION) * 100);
+        
+        if (newTime >= MAX_RECORDING_DURATION) {
+          stopRecording();
+          return MAX_RECORDING_DURATION;
+        }
+        
+        return newTime;
+      });
+    }, 100);
   };
   
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+    setIsRecording(false);
+    
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
     }
   };
   
-  const processRecording = async () => {
-    if (audioChunksRef.current.length === 0) {
-      toast({
-        title: "Recording error",
-        description: "No audio data was captured.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleSubmitIntervention = () => {
+    // In a real implementation, we would send the recorded audio to a server
+    // and get back a response audio URL. For now, we'll simulate that.
+    const mockResponseUrl = `intervention_response_${Date.now()}.mp3`;
     
-    setIsProcessing(true);
-    
-    try {
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-      
-      // Create WebSocket connection
-      const socket = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/audio`);
-      socketRef.current = socket;
-      
-      socket.onopen = () => {
-        console.log('WebSocket connection opened');
-        socket.send(audioBlob);
-        
-        toast({
-          title: "Processing",
-          description: "Your audio is being processed...",
-        });
-      };
-      
-      socket.onmessage = (event) => {
-        try {
-          const response = JSON.parse(event.data);
-          if (response.audioUrl) {
-            // For MVP, we'll just simulate receiving a response
-            handleInterventionResponse(response.audioUrl);
-          }
-        } catch (e) {
-          console.error('Error parsing WebSocket message:', e);
-        }
-      };
-      
-      socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        toast({
-          title: "Connection error",
-          description: "Failed to process your audio. Please try again.",
-          variant: "destructive"
-        });
-        setIsProcessing(false);
-      };
-      
-      socket.onclose = () => {
-        console.log('WebSocket connection closed');
-      };
-      
-      // For MVP purposes, let's simulate a response after 2 seconds
-      setTimeout(() => {
-        if (socket.readyState === WebSocket.OPEN) {
-          // Simulate a response coming from the server
-          const mockResponseUrl = 'https://s3.amazonaws.com/cdn01.ituneweekly.com/demo-response.mp3';
-          handleInterventionResponse(mockResponseUrl);
-          socket.close();
-        }
-      }, 2000);
-      
-    } catch (error) {
-      console.error('Error processing recording:', error);
-      toast({
-        title: "Processing error",
-        description: "Failed to process your audio. Please try again.",
-        variant: "destructive"
-      });
-      setIsProcessing(false);
-    }
-  };
-  
-  const handleInterventionResponse = (responseAudioUrl: string) => {
-    setIsProcessing(false);
-    
-    toast({
-      title: "Response received",
-      description: "Playing AI response...",
-    });
-    
-    // Create a new Howl instance for the response audio
-    const responseSound = new Howl({
-      src: [responseAudioUrl],
-      html5: true,
-      volume: volume,
-      onend: () => {
-        // Resume original audio after response is done
-        if (soundRef.current) {
-          soundRef.current.play();
-        }
-      }
-    });
-    
-    // Play the response
-    responseSound.play();
-    
-    // Call the callback if provided
     if (onInterveneComplete) {
-      onInterveneComplete(responseAudioUrl);
+      onInterveneComplete(mockResponseUrl);
+    }
+    
+    setIsIntervening(false);
+    setRecordingTime(0);
+    setRecordingProgress(0);
+    
+    // Optionally resume playback
+    if (soundRef.current) {
+      soundRef.current.play();
     }
   };
   
-  return (
-    <div className="bg-[#1E1E1E] rounded-xl border border-[#333] p-6 shadow-md w-full max-w-md mx-auto relative overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute -top-12 -right-12 w-32 h-32 bg-gradient-blue opacity-10 rounded-full blur-xl"></div>
-      <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-gradient-primary opacity-10 rounded-full blur-xl"></div>
-      
-      {/* Waveform / Timeline display */}
-      <div className="relative w-full h-20 bg-[#111] rounded-lg mb-4 overflow-hidden flex flex-col justify-center">
-        {/* Simplified waveform graphic */}
-        <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-          {Array.from({ length: 40 }).map((_, i) => {
-            const height = 5 + Math.random() * 25;
-            return (
-              <div 
-                key={i} 
-                className="w-1.5 mx-0.5 bg-gradient-to-t from-[#29B6F6]/30 to-[#29B6F6]/80 rounded-full" 
-                style={{ 
-                  height: `${height}px`,
-                  opacity: seek > 0 && i < (seek / duration) * 40 ? 1 : 0.4
-                }}
-              />
-            );
-          })}
+  // Render different UI based on intervention state
+  if (isIntervening) {
+    return (
+      <motion.div 
+        className="bg-[#111] rounded-xl p-6 border border-[#333] shadow-lg"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-white">Ask a Question</h3>
+          <motion.button 
+            className="text-white/70 hover:text-white p-1 rounded-full"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleCancelIntervene}
+          >
+            <X className="h-5 w-5" />
+          </motion.button>
         </div>
         
-        {/* Seek control */}
+        <p className="text-[#888] text-sm mb-6">
+          {isRecording 
+            ? "Recording... Speak clearly into your microphone."
+            : "Press the microphone button and ask your question."}
+        </p>
+        
+        <div className="flex flex-col items-center justify-center mb-6">
+          {/* Recording progress circle */}
+          <div className="relative w-24 h-24 mb-4">
+            <svg className="w-full h-full" viewBox="0 0 100 100">
+              {/* Background circle */}
+              <circle 
+                cx="50" 
+                cy="50" 
+                r="45" 
+                fill="none" 
+                stroke="#333" 
+                strokeWidth="8"
+              />
+              
+              {/* Progress circle */}
+              {isRecording && (
+                <circle 
+                  cx="50" 
+                  cy="50" 
+                  r="45" 
+                  fill="none" 
+                  stroke="#9333EA" 
+                  strokeWidth="8"
+                  strokeDasharray={`${2 * Math.PI * 45}`}
+                  strokeDashoffset={`${2 * Math.PI * 45 * (1 - recordingProgress / 100)}`}
+                  transform="rotate(-90 50 50)"
+                />
+              )}
+              
+              {/* Microphone button */}
+              <foreignObject x="25" y="25" width="50" height="50">
+                <motion.button 
+                  className={`w-full h-full rounded-full flex items-center justify-center ${isRecording ? 'bg-red-500' : 'bg-[#555] hover:bg-[#9333EA]'}`}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={isRecording ? stopRecording : startRecording}
+                >
+                  <Mic className="h-6 w-6 text-white" />
+                </motion.button>
+              </foreignObject>
+            </svg>
+            
+            {isRecording && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-white text-xs font-mono mt-16">
+                  {recordingTime.toFixed(1)}s
+                </span>
+              </div>
+            )}
+          </div>
+          
+          {/* Recording time */}
+          <div className="text-center">
+            <p className="text-[#888] text-xs">
+              {isRecording ? `Max ${MAX_RECORDING_DURATION} seconds` : "Ready to record"}
+            </p>
+            {recordingTime > 0 && !isRecording && (
+              <p className="text-white text-sm mt-2">
+                Recorded {recordingTime.toFixed(1)} seconds
+              </p>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex justify-center">
+          <motion.button 
+            className={`px-6 py-3 rounded-lg flex items-center ${recordingTime > 0 ? 'bg-gradient-purple hover:bg-purple-700' : 'bg-[#333] opacity-50 cursor-not-allowed'} text-white font-medium`}
+            whileHover={recordingTime > 0 ? { scale: 1.05 } : { scale: 1 }}
+            whileTap={recordingTime > 0 ? { scale: 0.95 } : { scale: 1 }}
+            onClick={recordingTime > 0 ? handleSubmitIntervention : undefined}
+            disabled={recordingTime === 0}
+          >
+            <Send className="h-4 w-4 mr-2" /> Submit Question
+          </motion.button>
+        </div>
+      </motion.div>
+    );
+  }
+  
+  // Regular audio player UI
+  return (
+    <div className="bg-[#111] rounded-xl p-6 border border-[#333] shadow-lg">
+      {/* Progress bar */}
+      <div className="mb-4">
         <input 
           type="range" 
           min="0" 
-          max={duration} 
-          step="0.01" 
-          value={seek} 
+          max="100" 
+          value={progress} 
           onChange={handleSeek}
-          className="w-full absolute bottom-0 left-0 right-0 accent-[#29B6F6] appearance-none bg-transparent z-10 cursor-pointer" 
-          disabled={isLoading}
+          className="w-full h-2 bg-[#333] rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500"
         />
-        
-        {/* Time display */}
-        <div className="absolute bottom-1 left-2 text-xs text-white/60">
-          {formatTime(seek)}
+        <div className="flex justify-between text-xs text-[#888] mt-2">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
         </div>
-        <div className="absolute bottom-1 right-2 text-xs text-white/60">
-          {formatTime(duration)}
-        </div>
-        
-        {/* Intervene Button */}
-        <motion.button
-          className="absolute right-3 top-3 z-20 bg-gradient-red rounded-full w-10 h-10 flex items-center justify-center shadow-md"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={isRecording ? stopRecording : startRecording}
-          disabled={isProcessing}
-        >
-          {isProcessing ? (
-            <Loader2 className="w-5 h-5 text-white animate-spin" />
-          ) : isRecording ? (
-            <X className="w-5 h-5 text-white" />
-          ) : (
-            <Mic className="w-5 h-5 text-white" />
-          )}
-        </motion.button>
-        
-        {/* Recording indicator */}
-        {isRecording && (
-          <div className="absolute left-3 top-3 flex items-center space-x-2 bg-black/50 rounded-full px-3 py-1">
-            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-            <span className="text-xs text-white">
-              {(8 - recordingTime / 1000).toFixed(1)}s
-            </span>
-          </div>
-        )}
       </div>
       
       {/* Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="bg-[#333] hover:bg-[#444] border-none h-12 w-12 rounded-full"
-            onClick={jumpBackward}
-            disabled={isLoading}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-4">
+          {/* Skip backward */}
+          <motion.button 
+            className="text-white/70 hover:text-white"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => skip('backward')}
           >
-            <SkipBack className="h-5 w-5 text-white" />
-          </Button>
+            <SkipBack className="h-5 w-5" />
+          </motion.button>
           
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="bg-[#29B6F6] hover:bg-[#29B6F6]/90 border-none h-14 w-14 rounded-full"
-            onClick={handlePlay}
-            disabled={isLoading}
+          {/* Play/Pause */}
+          <motion.button 
+            className="bg-gradient-blue text-white w-12 h-12 rounded-full flex items-center justify-center"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={togglePlay}
           >
-            {isLoading ? (
-              <Loader2 className="h-6 w-6 text-white animate-spin" />
-            ) : isPlaying ? (
-              <Pause className="h-6 w-6 text-white" />
-            ) : (
-              <Play className="h-6 w-6 text-white ml-1" />
-            )}
-          </Button>
+            {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
+          </motion.button>
           
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="bg-[#333] hover:bg-[#444] border-none h-12 w-12 rounded-full"
-            onClick={jumpForward}
-            disabled={isLoading}
+          {/* Skip forward */}
+          <motion.button 
+            className="text-white/70 hover:text-white"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => skip('forward')}
           >
-            <SkipForward className="h-5 w-5 text-white" />
-          </Button>
+            <SkipForward className="h-5 w-5" />
+          </motion.button>
         </div>
         
-        <div className="w-1/3 flex items-center space-x-2">
-          <span className="text-xs text-white/60">Vol</span>
-          <input 
-            type="range" 
-            min="0" 
-            max="1" 
-            step="0.01" 
-            value={volume} 
-            onChange={handleVolumeChange}
-            className="w-full accent-[#29B6F6] appearance-none h-1 bg-[#333] rounded-full" 
-          />
-        </div>
-      </div>
-      
-      {/* Description text */}
-      <div className="mt-4 text-center text-sm text-white/60">
-        {isProcessing ? (
-          <div className="flex items-center justify-center space-x-2">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Processing your intervention...</span>
+        <div className="flex items-center space-x-4">
+          {/* Intervene button */}
+          <motion.button 
+            className="bg-gradient-purple text-white px-4 py-2 rounded-full flex items-center"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleInterveneStart}
+          >
+            <Mic className="h-4 w-4 mr-2" /> Intervene
+          </motion.button>
+          
+          {/* Volume controls */}
+          <div className="flex items-center space-x-2">
+            <motion.button 
+              className="text-white/70 hover:text-white"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={toggleMute}
+            >
+              {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+            </motion.button>
+            
+            <input 
+              type="range" 
+              min="0" 
+              max="1" 
+              step="0.01" 
+              value={volume} 
+              onChange={handleVolumeChange}
+              className="w-20 h-1.5 bg-[#333] rounded-full appearance-none cursor-pointer"
+            />
           </div>
-        ) : isRecording ? (
-          <div>Recording your intervention. Speak now!</div>
-        ) : (
-          <div>Press the mic button to intervene and ask questions.</div>
-        )}
+        </div>
       </div>
     </div>
   );
