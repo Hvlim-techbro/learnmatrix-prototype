@@ -2,6 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import WebSocket from "ws";
+import OpenAI from "openai";
+import fs from 'fs';
+import path from 'path';
 import { storage } from "./storage";
 import { z } from "zod";
 import { 
@@ -10,11 +13,95 @@ import {
   insertBadgeSchema 
 } from "@shared/schema";
 
+// Initialize OpenAI with API key from environment
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
   // WebSocket for real-time quiz battles and notifications
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // WebSocket server for audio transcription
+  const audioWss = new WebSocketServer({ server: httpServer, path: '/ws/audio' });
+  
+  audioWss.on('connection', (ws) => {
+    console.log('Audio WebSocket connection established');
+    
+    ws.on('message', async (message) => {
+      try {
+        // Check if the message is binary (audio data)
+        if (message instanceof Buffer) {
+          console.log('Received audio data, length:', message.length);
+          
+          // Create a Buffer from the received data
+          const audioBuffer = Buffer.from(message);
+          
+          try {
+            // Save the audio buffer to a temporary file
+            const tempFilePath = path.join(process.cwd(), 'temp_audio.webm');
+            fs.writeFileSync(tempFilePath, audioBuffer);
+            
+            // Convert the audio to text using OpenAI's Whisper API
+            const transcription = await openai.audio.transcriptions.create({
+              file: fs.createReadStream(tempFilePath),
+              model: 'whisper-1',
+            });
+            
+            // Clean up the temporary file
+            fs.unlinkSync(tempFilePath);
+            
+            console.log('Transcription result:', transcription.text);
+            
+            // Send the transcription back to the client
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ 
+                type: 'transcription', 
+                transcript: transcription.text 
+              }));
+              
+              // Now, generate a response using GPT-4
+              const gptResponse = await openai.chat.completions.create({
+                model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+                messages: [
+                  { role: "system", content: "You are an AI tutor helping a student learn. Provide a brief, helpful response to their question." },
+                  { role: "user", content: transcription.text }
+                ],
+                max_tokens: 150
+              });
+              
+              const responseText = gptResponse.choices[0].message.content;
+              console.log('AI response:', responseText);
+              
+              // Send the AI response back to the client
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ 
+                  type: 'ai_response', 
+                  response: responseText 
+                }));
+              }
+            }
+          } catch (error) {
+            console.error('Error processing audio:', error);
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ 
+                type: 'error', 
+                message: 'Error processing audio' 
+              }));
+            }
+          }
+        } else {
+          console.log('Received non-binary message:', message.toString());
+        }
+      } catch (error) {
+        console.error('WebSocket error:', error);
+      }
+    });
+    
+    ws.on('close', () => {
+      console.log('Audio WebSocket connection closed');
+    });
+  });
   
   wss.on('connection', (ws) => {
     ws.on('message', (message) => {

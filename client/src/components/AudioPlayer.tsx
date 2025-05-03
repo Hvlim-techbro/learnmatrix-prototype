@@ -166,6 +166,15 @@ export default function AudioPlayer({ audioUrl = DEFAULT_AUDIO_URL, onInterveneC
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
   
+  // WebSocket ref for the audio connection
+  const wsRef = useRef<WebSocket | null>(null);
+  
+  // MediaRecorder ref for recording audio
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  
+  // Audio chunks array for storing recorded audio data
+  const audioChunksRef = useRef<Blob[]>([]);
+  
   // Intervention functionality
   const handleInterveneStart = () => {
     if (soundRef.current && isPlaying) {
@@ -183,29 +192,70 @@ export default function AudioPlayer({ audioUrl = DEFAULT_AUDIO_URL, onInterveneC
     setRecordingProgress(0);
   };
   
-  const startRecording = () => {
-    setIsRecording(true);
-    setRecordingTime(0);
-    setRecordingProgress(0);
-    
-    // In a real implementation, we would use the MediaRecorder API
-    // For this MVP, we'll simulate recording with a timer
-    recordingTimerRef.current = setInterval(() => {
-      setRecordingTime(prev => {
-        const newTime = prev + 0.1;
-        setRecordingProgress((newTime / MAX_RECORDING_DURATION) * 100);
-        
-        if (newTime >= MAX_RECORDING_DURATION) {
-          stopRecording();
-          return MAX_RECORDING_DURATION;
+  const startRecording = async () => {
+    try {
+      // Reset audio chunks
+      audioChunksRef.current = [];
+      
+      // Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Create a new MediaRecorder instance
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      
+      // Set up event handlers
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
         }
-        
-        return newTime;
-      });
-    }, 100);
+      };
+      
+      // Start recording
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+      setRecordingProgress(0);
+      
+      // Set up a timer to track recording time and progress
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(prev => {
+          const newTime = prev + 0.1;
+          setRecordingProgress((newTime / MAX_RECORDING_DURATION) * 100);
+          
+          if (newTime >= MAX_RECORDING_DURATION) {
+            stopRecording();
+            return MAX_RECORDING_DURATION;
+          }
+          
+          return newTime;
+        });
+      }, 100);
+      
+      // Auto-stop after MAX_RECORDING_DURATION
+      setTimeout(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+          stopRecording();
+        }
+      }, MAX_RECORDING_DURATION * 1000);
+      
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      alert('Could not access microphone. Please check your browser permissions.');
+      setIsRecording(false);
+    }
   };
   
   const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+      
+      // Stop all tracks in the media stream
+      if (mediaRecorderRef.current.stream) {
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      }
+    }
+    
     setIsRecording(false);
     
     if (recordingTimerRef.current) {
@@ -214,22 +264,83 @@ export default function AudioPlayer({ audioUrl = DEFAULT_AUDIO_URL, onInterveneC
     }
   };
   
-  const handleSubmitIntervention = () => {
-    // In a real implementation, we would send the recorded audio to a server
-    // and get back a response audio URL. For now, we'll simulate that.
-    const mockResponseUrl = `intervention_response_${Date.now()}.mp3`;
-    
-    if (onInterveneComplete) {
-      onInterveneComplete(mockResponseUrl);
+  const handleSubmitIntervention = async () => {
+    if (audioChunksRef.current.length === 0) {
+      alert('No audio recorded. Please record your question first.');
+      return;
     }
     
-    setIsIntervening(false);
-    setRecordingTime(0);
-    setRecordingProgress(0);
-    
-    // Optionally resume playback
-    if (soundRef.current) {
-      soundRef.current.play();
+    try {
+      // Create a blob from the audio chunks
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      
+      // Establish WebSocket connection
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws/audio`;
+      
+      wsRef.current = new WebSocket(wsUrl);
+      
+      wsRef.current.onopen = async () => {
+        console.log('WebSocket connection established');
+        
+        if (wsRef.current) {
+          // Convert blob to array buffer and send over WebSocket
+          const arrayBuffer = await audioBlob.arrayBuffer();
+          wsRef.current.send(arrayBuffer);
+        }
+      };
+      
+      wsRef.current.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.type === 'transcription') {
+            console.log('Transcription received:', data.transcript);
+          } 
+          else if (data.type === 'ai_response') {
+            console.log('AI response received:', data.response);
+            
+            // Generate a response URL (in a real app, this would be a URL to an audio file)
+            const responseMessage = `AI Response: ${data.response}`;
+            
+            if (onInterveneComplete) {
+              onInterveneComplete(responseMessage);
+            }
+            
+            setIsIntervening(false);
+            setRecordingTime(0);
+            setRecordingProgress(0);
+            
+            // Resume playback
+            if (soundRef.current) {
+              soundRef.current.play();
+            }
+          }
+          else if (data.type === 'error') {
+            console.error('Error from server:', data.message);
+            alert(`Error: ${data.message}`);
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+      
+      wsRef.current.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        alert('Error connecting to the server. Please try again.');
+      };
+      
+      wsRef.current.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+      
+    } catch (error) {
+      console.error('Error submitting intervention:', error);
+      alert('Error submitting your question. Please try again.');
+      
+      setIsIntervening(false);
+      setRecordingTime(0);
+      setRecordingProgress(0);
     }
   };
   
