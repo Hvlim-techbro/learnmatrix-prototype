@@ -9,6 +9,7 @@ import TabBar from "@/components/TabBar";
 import Home from "@/pages/Home";
 import Onboarding from "@/pages/Onboarding";
 import AudioTutor from "@/pages/AudioTutor";
+import AudioMvp from "@/pages/AudioMvp";
 import VisualTutor from "@/pages/VisualTutor";
 import QuizBattle from "@/pages/QuizBattle";
 import CohortEngine from "@/pages/CohortEngine";
@@ -89,6 +90,7 @@ function Router() {
           <Route path="/home" component={Home} />
           <Route path="/dashboard" component={Home} />
           <Route path="/audio-tutor" component={AudioTutor} />
+          <Route path="/audio-mvp" component={AudioMvp} />
           <Route path="/visual-tutor" component={VisualTutor} />
           <Route path="/quiz-battle" component={QuizBattle} />
           <Route path="/cohort" component={CohortEngine} />
