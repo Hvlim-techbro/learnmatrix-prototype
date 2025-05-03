@@ -34,113 +34,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (message instanceof Buffer) {
           console.log('Received audio data, length:', message.length);
           
-          // Create a Buffer from the received data
-          const audioBuffer = Buffer.from(message);
-          
           try {
-            // Save the audio buffer to a temporary file
-            const tempFilePath = path.join(process.cwd(), 'temp_audio.webm');
-            fs.writeFileSync(tempFilePath, audioBuffer);
+            // Create a unique filename to avoid conflicts
+            const timestamp = Date.now();
+            const tempFilePath = path.join(process.cwd(), `temp_audio_${timestamp}.webm`);
+            console.log('Saving audio to:', tempFilePath);
             
-            // Convert the audio to text using OpenAI's Whisper API
+            // Save the audio buffer to a temporary file
+            fs.writeFileSync(tempFilePath, Buffer.from(message));
+            
+            console.log('Audio file saved, starting transcription...');
+            
+            // Step 1: Transcribe audio with Whisper
             const transcription = await openai.audio.transcriptions.create({
               file: fs.createReadStream(tempFilePath),
               model: 'whisper-1',
             });
             
-            // Clean up the temporary file
-            fs.unlinkSync(tempFilePath);
+            console.log('Transcription successful:', transcription.text);
             
-            console.log('Transcription result:', transcription.text);
+            // Clean up temporary audio file
+            fs.unlinkSync(tempFilePath);
             
             // Send the transcription back to the client
             if (ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ 
-                type: 'transcription', 
-                transcript: transcription.text 
+              ws.send(JSON.stringify({
+                type: 'transcription',
+                transcript: transcription.text
               }));
+            }
+            
+            // Step 2: Get AI response from GPT-4o with host personas
+            const moduleName = "Neural Networks and Deep Learning";
+            
+            const gptResponse = await openai.chat.completions.create({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "system",
+                  content: "You are two co-hosts on an educational podcast discussing a topic in depth. Host A is clear and concise; Host B is friendly and humorous. Always refer back to each other by name ('Host A: …', 'Host B: …')."
+                },
+                {
+                  role: "user",
+                  content: `Module: ${moduleName}\nLearner asked: ${transcription.text}\nContinue the discussion.`
+                }
+              ],
+              max_tokens: 300
+            });
+            
+            const responseText = gptResponse.choices[0].message.content || '';
+            console.log('AI response:', responseText);
+            
+            // Step 3: Convert response to speech with OpenAI TTS
+            try {
+              // Ensure we have valid text for TTS
+              const ttsInput = responseText.trim() || 'I apologize, but I need more information to provide a helpful response.';
               
-              // Get the current module name (this would come from your application context in a real app)
-              const moduleName = "Neural Networks and Deep Learning";
-              
-              // Now, generate a response using GPT-4 with Host A & Host B personas
-              const gptResponse = await openai.chat.completions.create({
-                model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-                messages: [
-                  { 
-                    role: "system", 
-                    content: "You are two co-hosts on an educational podcast discussing a topic in depth. Host A is clear and concise; Host B is friendly and humorous. Always refer back to each other by name ('Host A: …', 'Host B: …')." 
-                  },
-                  { 
-                    role: "user", 
-                    content: `Module: ${moduleName}\nLearner asked: ${transcription.text}\nContinue the discussion.` 
-                  }
-                ],
-                max_tokens: 300
+              const audioResponse = await openai.audio.speech.create({
+                model: "tts-1",
+                voice: "alloy",
+                input: ttsInput,
               });
               
-              const responseText = gptResponse.choices[0].message.content;
-              console.log('AI response:', responseText);
+              // Get audio data as buffer
+              const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
               
-              // Generate audio from the text using OpenAI's TTS
-              try {
-                // Ensure responseText is a valid string
-                const ttsInput = typeof responseText === 'string' && responseText.trim() ? responseText : 'I apologize, but I need more information to provide a helpful response.';
-                
-                const audioResponse = await openai.audio.speech.create({
-                  model: "tts-1",
-                  voice: "alloy", // Choose from 'alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'
-                  input: ttsInput,
-                });
-                
-                // Convert to buffer
-                const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
-                
-                // Save to a temporary file
-                const tempAudioPath = path.join(process.cwd(), `temp_response_${Date.now()}.mp3`);
-                fs.writeFileSync(tempAudioPath, audioBuffer);
-                
-                // Read the file and convert to base64
-                const audioBase64 = fs.readFileSync(tempAudioPath).toString('base64');
-                
-                // Send both text and audio data back to the client
-                if (ws.readyState === WebSocket.OPEN) {
-                  ws.send(JSON.stringify({ 
-                    type: 'ai_response', 
-                    response: responseText,
-                    audioData: audioBase64
-                  }));
-                }
-                
-                // Clean up the temporary file
-                fs.unlinkSync(tempAudioPath);
-                
-              } catch (error) {
-                console.error('Error generating TTS:', error);
-                // Fallback to just sending the text response if TTS fails
-                if (ws.readyState === WebSocket.OPEN) {
-                  ws.send(JSON.stringify({ 
-                    type: 'ai_response', 
-                    response: responseText 
-                  }));
-                }
+              // Save to a temporary file
+              const tempAudioPath = path.join(process.cwd(), `temp_response_${Date.now()}.mp3`);
+              fs.writeFileSync(tempAudioPath, audioBuffer);
+              
+              // Convert to base64 for sending over WebSocket
+              const audioBase64 = fs.readFileSync(tempAudioPath).toString('base64');
+              
+              // Send both text and audio data back to the client
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                  type: 'ai_response',
+                  response: responseText,
+                  audioData: audioBase64
+                }));
+              }
+              
+              // Clean up the temporary file
+              fs.unlinkSync(tempAudioPath);
+              
+            } catch (ttsError) {
+              console.error('Error generating TTS:', ttsError);
+              
+              // Fallback to just sending the text response if TTS fails
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                  type: 'ai_response',
+                  response: responseText
+                }));
               }
             }
-          } catch (error) {
-            console.error('Error processing audio:', error);
+            
+          } catch (processingError) {
+            console.error('Error processing audio:', processingError);
+            
             if (ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ 
-                type: 'error', 
-                message: 'Error processing audio' 
+              ws.send(JSON.stringify({
+                type: 'error',
+                message: 'Error processing audio'
               }));
             }
           }
+          
         } else {
           console.log('Received non-binary message:', message.toString());
+          
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+              type: 'error',
+              message: 'Expected binary audio data'
+            }));
+          }
         }
+        
       } catch (error) {
         console.error('WebSocket error:', error);
+        
+        try {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+              type: 'error',
+              message: 'Server error processing request'
+            }));
+          }
+        } catch (sendError) {
+          console.error('Error sending error message:', sendError);
+        }
       }
+    });
+    
+    ws.on('error', (error) => {
+      console.error('WebSocket connection error:', error);
     });
     
     ws.on('close', () => {

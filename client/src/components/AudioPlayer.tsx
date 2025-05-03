@@ -274,21 +274,50 @@ export default function AudioPlayer({ audioUrl = DEFAULT_AUDIO_URL, onInterveneC
       // Create a blob from the audio chunks
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
       
+      // Pause the current audio playback
+      if (soundRef.current) {
+        soundRef.current.pause();
+      }
+
+      // Create a connection timeout promise
+      const connectionTimeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('WebSocket connection timeout')), 5000);
+      });
+      
       // Establish WebSocket connection
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}/ws/audio`;
+      console.log('Connecting to WebSocket at:', wsUrl);
       
       wsRef.current = new WebSocket(wsUrl);
       
-      wsRef.current.onopen = async () => {
-        console.log('WebSocket connection established');
+      // Use a promise to handle WebSocket connection
+      const connectionPromise = new Promise((resolve, reject) => {
+        if (!wsRef.current) return reject(new Error('WebSocket not initialized'));
         
-        if (wsRef.current) {
-          // Convert blob to array buffer and send over WebSocket
-          const arrayBuffer = await audioBlob.arrayBuffer();
-          wsRef.current.send(arrayBuffer);
-        }
-      };
+        wsRef.current.onopen = () => {
+          console.log('WebSocket connection established');
+          resolve(true);
+        };
+        
+        wsRef.current.onerror = (error) => {
+          console.error('WebSocket connection error:', error);
+          reject(new Error('Failed to establish WebSocket connection'));
+        };
+      });
+      
+      // Wait for connection to be established or timeout
+      await Promise.race([connectionPromise, connectionTimeout]);
+      
+      // Now we have a connection, send the audio data
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        console.log('Sending audio data over WebSocket...');
+        // Convert blob to array buffer and send over WebSocket
+        const arrayBuffer = await audioBlob.arrayBuffer();
+        wsRef.current.send(arrayBuffer);
+      } else {
+        throw new Error('WebSocket not open');
+      }
       
       wsRef.current.onmessage = (event) => {
         try {
