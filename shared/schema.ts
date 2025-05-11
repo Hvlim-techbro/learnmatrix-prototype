@@ -15,6 +15,7 @@ export const users = pgTable("users", {
   streak: integer("streak").notNull().default(0),
   lastActive: timestamp("last_active").defaultNow(),
   cohortId: integer("cohort_id").references(() => cohorts.id),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const cohorts = pgTable("cohorts", {
@@ -23,6 +24,7 @@ export const cohorts = pgTable("cohorts", {
   description: text("description").notNull(),
   tier: text("tier").notNull().default("Novice Nexus"),
   memberCount: integer("member_count").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const challenges = pgTable("challenges", {
@@ -36,6 +38,7 @@ export const challenges = pgTable("challenges", {
   progress: integer("progress").notNull().default(0),
   userId: integer("user_id").references(() => users.id),
   expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const badges = pgTable("badges", {
@@ -45,6 +48,7 @@ export const badges = pgTable("badges", {
   icon: text("icon").notNull(),
   color: text("color").notNull(),
   userId: integer("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const modules = pgTable("modules", {
@@ -54,6 +58,7 @@ export const modules = pgTable("modules", {
   icon: text("icon").notNull(), 
   color: text("color").notNull(),
   unreadNotifications: integer("unread_notifications").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const lessons = pgTable("lessons", {
@@ -63,6 +68,7 @@ export const lessons = pgTable("lessons", {
   duration: integer("duration").notNull(), // in seconds
   completed: boolean("completed").notNull().default(false),
   userId: integer("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Insert schemas
@@ -73,30 +79,36 @@ export const insertUserSchema = createInsertSchema(users).omit({
   tier: true,
   streak: true,
   lastActive: true,
+  createdAt: true,
 });
 
 export const insertCohortSchema = createInsertSchema(cohorts).omit({
   id: true,
   memberCount: true,
+  createdAt: true,
 });
 
 export const insertChallengeSchema = createInsertSchema(challenges).omit({
   id: true,
   progress: true,
+  createdAt: true,
 });
 
 export const insertBadgeSchema = createInsertSchema(badges).omit({
   id: true,
+  createdAt: true,
 });
 
 export const insertModuleSchema = createInsertSchema(modules).omit({
   id: true,
   unreadNotifications: true,
+  createdAt: true,
 });
 
 export const insertLessonSchema = createInsertSchema(lessons).omit({
   id: true,
   completed: true,
+  createdAt: true,
 });
 
 // Types
