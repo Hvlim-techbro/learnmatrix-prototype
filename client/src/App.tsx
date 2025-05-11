@@ -82,7 +82,7 @@ function Router() {
       <main className={`flex-1 overflow-y-auto ${showHeaderAndTabs ? 'pb-20 max-w-screen-lg w-full mx-auto' : 'w-full'} relative z-10`}>
         <Switch>
           {/* Welcome Flow Routes */}
-          <Route path="/" component={AudioMvp} />
+          <Route path="/" component={SplashScreen} />
           <Route path="/splash" component={SplashScreen} />
           <Route path="/welcome" component={WelcomeScreen} />
           <Route path="/signup" component={SignUp} />
@@ -119,9 +119,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-black">
-          <AudioMvp />
-        </div>
+        <Router />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

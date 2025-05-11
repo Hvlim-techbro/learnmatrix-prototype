@@ -22,7 +22,7 @@ export default function PlanSelection() {
         // Set the flag to indicate onboarding flow is complete
         localStorage.setItem("learnMatrixOnboardingCompleted", "true");
         setShowLoader(false);
-        setLocation('/');
+        setLocation('/home');
       }, 2000);
     }
   };
