@@ -10,7 +10,6 @@ import Home from "@/pages/Home";
 import Onboarding from "@/pages/Onboarding";
 import AudioTutor from "@/pages/AudioTutor";
 import AudioMvp from "@/pages/AudioMvp";
-import BasicAudioMvp from "@/pages/BasicAudioMvp";
 import VisualTutor from "@/pages/VisualTutor";
 import QuizBattle from "@/pages/QuizBattle";
 import CohortEngine from "@/pages/CohortEngine";
@@ -33,10 +32,10 @@ function Router() {
     const onboardingCompleted = localStorage.getItem("learnMatrixOnboardingCompleted");
     setHasCompletedOnboarding(!!onboardingCompleted);
     
-    // Clear the initial load state after checking (give it more time to load)
+    // Clear the initial load state after checking
     const timer = setTimeout(() => {
       setIsInitialLoad(false);
-    }, 500);
+    }, 100);
     
     return () => clearTimeout(timer);
   }, []);
@@ -51,20 +50,17 @@ function Router() {
     "/plan-selection"
   ].includes(location) && !hasCompletedOnboarding;
   
-  // Development helper - uncomment to test welcome flow
+  // Force localStorage check for testing
+  // Uncomment to force welcome flow regardless of localStorage
   // localStorage.removeItem("learnMatrixOnboardingCompleted");
 
   // Hide header and tab bar on welcome flow screens
   const showHeaderAndTabs = !isWelcomeFlowPage && location !== "/onboarding";
   
-  // Show initial splash screen (but fix the previous loading issue)
-  if (isInitialLoad) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="w-20 h-20 rounded-full bg-gradient-primary animate-pulse-custom"></div>
-      </div>
-    );
-  }
+  // Comment out this conditional to fix initial loading issues
+  // if (isInitialLoad && !hasCompletedOnboarding) {
+  //   return <SplashScreen />;
+  // }
 
   return (
     <div className="min-h-screen flex flex-col bg-black relative">
@@ -82,7 +78,7 @@ function Router() {
       <main className={`flex-1 overflow-y-auto ${showHeaderAndTabs ? 'pb-20 max-w-screen-lg w-full mx-auto' : 'w-full'} relative z-10`}>
         <Switch>
           {/* Welcome Flow Routes */}
-          <Route path="/" component={SplashScreen} />
+          <Route path="/" component={hasCompletedOnboarding ? Home : WelcomeScreen} />
           <Route path="/splash" component={SplashScreen} />
           <Route path="/welcome" component={WelcomeScreen} />
           <Route path="/signup" component={SignUp} />

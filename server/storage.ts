@@ -39,34 +39,24 @@ export interface IStorage {
   markLessonCompleted(id: number, userId: number): Promise<Lesson | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: User[] = [];
-  private cohorts: Cohort[] = [];
-  private challenges: Challenge[] = [];
-  private badges: Badge[] = [];
-  private modules: Module[] = [];
-  private lessons: Lesson[] = [];
-  private nextIds = {
-    user: 1,
-    cohort: 1,
-    challenge: 1,
-    badge: 1,
-    module: 1,
-    lesson: 1
-  };
+import { db } from './db';
+import { eq, and } from 'drizzle-orm';
 
+export class DatabaseStorage implements IStorage {
   constructor() {
     // Initialize with default data
-    this.initDefaultData();
+    this.initDefaultData().catch(console.error);
   }
   
   private async initDefaultData() {
-    if (this.users.length > 0) {
-      console.log('Memory storage already initialized with data');
+    // Check if we already have users in the database
+    const userCheck = await db.select().from(users).limit(1);
+    if (userCheck.length > 0) {
+      console.log('Database already initialized with data');
       return;
     }
     
-    console.log('Initializing memory storage with default data...');
+    console.log('Initializing database with default data...');
     
     // Create default user
     const defaultUser = await this.createUser({
@@ -157,21 +147,22 @@ export class MemStorage implements IStorage {
     // Update user XP to have some initial progress
     await this.updateUserXp(defaultUser.id, 250);
     
-    console.log('Memory storage successfully initialized with default data');
+    console.log('Database successfully initialized with default data');
   }
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.find(u => u.id === id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return this.users.find(u => u.username === username);
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const newUser: User = {
-      id: this.nextIds.user++,
+    const [user] = await db.insert(users).values({
       username: insertUser.username,
       password: insertUser.password,
       displayName: insertUser.displayName,
@@ -181,13 +172,9 @@ export class MemStorage implements IStorage {
       level: 1,
       tier: "Novice Nexus",
       streak: 0,
-      cohortId: null,
-      lastActive: new Date(),
-      createdAt: new Date()
-    };
-    
-    this.users.push(newUser);
-    return newUser;
+      lastActive: new Date()
+    }).returning();
+    return user;
   }
   
   async updateUserXp(id: number, xp: number): Promise<User | undefined> {
@@ -197,33 +184,36 @@ export class MemStorage implements IStorage {
     const newXp = user.xp + xp;
     const newLevel = Math.floor(newXp / 300) + 1;
     
-    user.xp = newXp;
-    user.level = newLevel;
+    const [updatedUser] = await db
+      .update(users)
+      .set({ xp: newXp, level: newLevel })
+      .where(eq(users.id, id))
+      .returning();
     
-    return user;
+    return updatedUser;
   }
   
   async getUserChallenges(userId: number): Promise<Challenge[]> {
-    return this.challenges.filter(c => c.userId === userId);
+    return await db
+      .select()
+      .from(challenges)
+      .where(eq(challenges.userId, userId));
   }
 
   // Cohort operations
   async getCohort(id: number): Promise<Cohort | undefined> {
-    return this.cohorts.find(c => c.id === id);
+    const [cohort] = await db.select().from(cohorts).where(eq(cohorts.id, id));
+    return cohort;
   }
 
   async createCohort(insertCohort: InsertCohort): Promise<Cohort> {
-    const newCohort: Cohort = {
-      id: this.nextIds.cohort++,
+    const [cohort] = await db.insert(cohorts).values({
       name: insertCohort.name,
       description: insertCohort.description,
       tier: insertCohort.tier || "Novice Nexus",
-      memberCount: 0,
-      createdAt: new Date()
-    };
-    
-    this.cohorts.push(newCohort);
-    return newCohort;
+      memberCount: 0
+    }).returning();
+    return cohort;
   }
   
   async addUserToCohort(userId: number, cohortId: number): Promise<void> {
@@ -233,20 +223,28 @@ export class MemStorage implements IStorage {
     if (!user || !cohort) return;
     
     // Update user with cohort ID
-    user.cohortId = cohortId;
+    await db
+      .update(users)
+      .set({ cohortId })
+      .where(eq(users.id, userId));
     
     // Update cohort member count
-    cohort.memberCount += 1;
+    await db
+      .update(cohorts)
+      .set({ memberCount: cohort.memberCount + 1 })
+      .where(eq(cohorts.id, cohortId));
   }
 
   // Challenge operations
   async getChallenges(type: string): Promise<Challenge[]> {
-    return this.challenges.filter(c => c.type === type);
+    return await db
+      .select()
+      .from(challenges)
+      .where(eq(challenges.type, type));
   }
 
   async createChallenge(insertChallenge: InsertChallenge): Promise<Challenge> {
-    const newChallenge: Challenge = {
-      id: this.nextIds.challenge++,
+    const [challenge] = await db.insert(challenges).values({
       title: insertChallenge.title,
       description: insertChallenge.description,
       type: insertChallenge.type,
@@ -255,89 +253,87 @@ export class MemStorage implements IStorage {
       target: insertChallenge.target,
       progress: 0,
       userId: insertChallenge.userId || null,
-      expiresAt: insertChallenge.expiresAt || null,
-      createdAt: new Date()
-    };
-    
-    this.challenges.push(newChallenge);
-    return newChallenge;
+      expiresAt: insertChallenge.expiresAt || null
+    }).returning();
+    return challenge;
   }
   
   async updateChallengeProgress(id: number, progress: number): Promise<Challenge | undefined> {
-    const challenge = this.challenges.find(c => c.id === id);
-    if (!challenge) return undefined;
+    const [updatedChallenge] = await db
+      .update(challenges)
+      .set({ progress })
+      .where(eq(challenges.id, id))
+      .returning();
     
-    challenge.progress = progress;
-    return challenge;
+    return updatedChallenge;
   }
 
   // Badge operations
   async getBadges(userId: number): Promise<Badge[]> {
-    return this.badges.filter(b => b.userId === userId);
+    return await db
+      .select()
+      .from(badges)
+      .where(eq(badges.userId, userId));
   }
 
   async createBadge(insertBadge: InsertBadge): Promise<Badge> {
-    const newBadge: Badge = {
-      id: this.nextIds.badge++,
+    const [badge] = await db.insert(badges).values({
       name: insertBadge.name,
       description: insertBadge.description,
       icon: insertBadge.icon,
       color: insertBadge.color,
-      userId: insertBadge.userId || null,
-      createdAt: new Date()
-    };
-    
-    this.badges.push(newBadge);
-    return newBadge;
+      userId: insertBadge.userId || null
+    }).returning();
+    return badge;
   }
 
   // Module operations
   async getModules(): Promise<Module[]> {
-    return [...this.modules];
+    return await db.select().from(modules);
   }
 
   async createModule(insertModule: InsertModule): Promise<Module> {
-    const newModule: Module = {
-      id: this.nextIds.module++,
+    const [module] = await db.insert(modules).values({
       name: insertModule.name,
       description: insertModule.description,
       icon: insertModule.icon,
       color: insertModule.color,
-      unreadNotifications: 0,
-      createdAt: new Date()
-    };
-    
-    this.modules.push(newModule);
-    return newModule;
+      unreadNotifications: 0
+    }).returning();
+    return module;
   }
 
   // Lesson operations
   async getLessons(moduleId: number): Promise<Lesson[]> {
-    return this.lessons.filter(l => l.moduleId === moduleId);
+    return await db
+      .select()
+      .from(lessons)
+      .where(eq(lessons.moduleId, moduleId));
   }
 
   async createLesson(insertLesson: InsertLesson): Promise<Lesson> {
-    const newLesson: Lesson = {
-      id: this.nextIds.lesson++,
+    const [lesson] = await db.insert(lessons).values({
       title: insertLesson.title,
       moduleId: insertLesson.moduleId || null,
       duration: insertLesson.duration,
       completed: false,
-      userId: insertLesson.userId || null,
-      createdAt: new Date()
-    };
-    
-    this.lessons.push(newLesson);
-    return newLesson;
+      userId: insertLesson.userId || null
+    }).returning();
+    return lesson;
   }
   
   async markLessonCompleted(id: number, userId: number): Promise<Lesson | undefined> {
-    const lesson = this.lessons.find(l => l.id === id && l.userId === userId);
-    if (!lesson) return undefined;
+    const [updatedLesson] = await db
+      .update(lessons)
+      .set({ completed: true })
+      .where(and(
+        eq(lessons.id, id),
+        eq(lessons.userId, userId)
+      ))
+      .returning();
     
-    lesson.completed = true;
-    return lesson;
+    return updatedLesson;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
