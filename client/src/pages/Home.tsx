@@ -83,8 +83,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black">
       <div className="p-4 md:p-6">
-      {/* Guided Tour */}
-      <GuidedTour isOpen={showTour} onClose={() => setShowTour(false)} />
+        {/* Guided Tour */}
+        <GuidedTour isOpen={showTour} onClose={() => setShowTour(false)} />
       
       {/* Help button to re-open the tour */}
       <div className="fixed bottom-6 right-6 z-50">
