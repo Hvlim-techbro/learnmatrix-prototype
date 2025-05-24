@@ -57,10 +57,10 @@ function Router() {
   // Hide header and tab bar on welcome flow screens
   const showHeaderAndTabs = !isWelcomeFlowPage && location !== "/onboarding";
   
-  // Comment out this conditional to fix initial loading issues
-  // if (isInitialLoad && !hasCompletedOnboarding) {
-  //   return <SplashScreen />;
-  // }
+  // Show splash screen on initial load if onboarding not completed
+  if (isInitialLoad && !hasCompletedOnboarding && location === '/') {
+    return <SplashScreen />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-black relative">
@@ -78,7 +78,7 @@ function Router() {
       <main className={`flex-1 overflow-y-auto ${showHeaderAndTabs ? 'pb-20 max-w-screen-lg w-full mx-auto' : 'w-full'} relative z-10`}>
         <Switch>
           {/* Welcome Flow Routes */}
-          <Route path="/" component={hasCompletedOnboarding ? Home : WelcomeScreen} />
+          <Route path="/" component={hasCompletedOnboarding ? Home : SplashScreen} />
           <Route path="/splash" component={SplashScreen} />
           <Route path="/welcome" component={WelcomeScreen} />
           <Route path="/signup" component={SignUp} />

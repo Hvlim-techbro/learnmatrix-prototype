@@ -49,14 +49,19 @@ export class DatabaseStorage implements IStorage {
   }
   
   private async initDefaultData() {
-    // Check if we already have users in the database
-    const userCheck = await db.select().from(users).limit(1);
-    if (userCheck.length > 0) {
-      console.log('Database already initialized with data');
+    try {
+      // Check if we already have users in the database
+      const userCheck = await db.select().from(users).limit(1);
+      if (userCheck.length > 0) {
+        console.log('Database already initialized with data');
+        return;
+      }
+      
+      console.log('Initializing database with default data...');
+    } catch (error) {
+      console.warn('Database connection issue, using memory storage fallback');
       return;
     }
-    
-    console.log('Initializing database with default data...');
     
     // Create default user
     const defaultUser = await this.createUser({
