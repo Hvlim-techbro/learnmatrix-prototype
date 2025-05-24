@@ -22,20 +22,24 @@ export default function Home() {
     }
   }, []);
 
-  const { data: user } = useQuery<User>({
+  const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ['/api/user'],
+    retry: 1,
   });
 
-  const { data: modules = [] } = useQuery<Module[]>({
+  const { data: modules = [], isLoading: modulesLoading } = useQuery<Module[]>({
     queryKey: ['/api/modules'],
+    retry: 1,
   });
 
-  const { data: dailyChallenges = [] } = useQuery<Challenge[]>({
+  const { data: dailyChallenges = [], isLoading: challengesLoading } = useQuery<Challenge[]>({
     queryKey: ['/api/challenges/daily'],
+    retry: 1,
   });
   
-  const { data: badges = [] } = useQuery<Badge[]>({
+  const { data: badges = [], isLoading: badgesLoading } = useQuery<Badge[]>({
     queryKey: ['/api/user/badges'],
+    retry: 1,
   });
 
   const getModulePath = (name: string): string => {
@@ -64,8 +68,21 @@ export default function Home() {
     return customDescriptions[name] || desc;
   };
 
+  // Show loading state while essential data is loading
+  if (userLoading || modulesLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-neutral-darker">Loading your learning space...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 bg-black">
+    <div className="min-h-screen bg-black">
+      <div className="p-4 md:p-6">
       {/* Guided Tour */}
       <GuidedTour isOpen={showTour} onClose={() => setShowTour(false)} />
       
@@ -245,6 +262,7 @@ export default function Home() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
