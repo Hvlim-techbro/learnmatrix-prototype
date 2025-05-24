@@ -82,27 +82,27 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="p-4 md:p-6">
+      <div className="p-3 sm:p-4 lg:p-6">
         {/* Guided Tour */}
         <GuidedTour isOpen={showTour} onClose={() => setShowTour(false)} />
       
       {/* Help button to re-open the tour */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
         <Button
           onClick={() => setShowTour(true)}
-          className="rounded-full w-12 h-12 bg-gradient-primary shadow-custom-lg flex items-center justify-center"
+          className="rounded-full w-10 h-10 sm:w-12 sm:h-12 bg-gradient-primary shadow-custom-lg flex items-center justify-center"
         >
-          <HelpCircle className="h-6 w-6 text-white" />
+          <HelpCircle className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
         </Button>
       </div>
       {/* Welcome Section - Hero */}
       <div className="mb-10 animate-fade-in">
-        <div className="flex flex-col md:flex-row md:items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-primary">Hi, {user?.displayName?.split(' ')[0] || 'Jordan'}! 👋</h1>
-            <p className="text-neutral-darker text-lg">Welcome back to your learning journey</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-primary">Hi, {user?.displayName?.split(' ')[0] || 'Jordan'}! 👋</h1>
+            <p className="text-neutral-darker text-base sm:text-lg">Welcome back to your learning journey</p>
           </div>
-          <div className="mt-4 md:mt-0 flex space-x-2">
+          <div className="flex space-x-2 sm:mt-0">
             <div className="glass rounded-xl p-2 flex items-center">
               <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center shadow-custom-sm mr-2">
                 <Calendar className="h-4 w-4 text-white" />
@@ -135,7 +135,7 @@ export default function Home() {
             <div className="w-8 h-8 rounded-lg bg-gradient-blue flex items-center justify-center shadow-custom-sm mr-2">
               <BookOpen className="h-4 w-4 text-white" />
             </div>
-            <h2 className="text-xl font-semibold">Continue Learning</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">Continue Learning</h2>
           </div>
           <a href="/courses" className="flex items-center text-sm text-primary hover:underline transition-all duration-300">
             View All <ChevronRight className="h-4 w-4 ml-1" />
@@ -212,7 +212,7 @@ export default function Home() {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {modules.map(module => (
             <ModuleCard 
               key={module.id}
