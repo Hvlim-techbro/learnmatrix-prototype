@@ -1,20 +1,20 @@
 import {
   Home,
   Mic,
-  School, // Changed from ChalkboardUser which doesn't exist
+  School,
   Trophy,
   Users,
   BookOpen,
   Rocket,
   Medal,
-  Flame, // Changed from Fire which doesn't exist
+  Flame,
   Lightbulb,
   Zap,
   CheckCircle,
   ListChecks,
   Highlighter,
   HelpingHand,
-  Award, // Changed from Certificate which doesn't exist
+  Award,
   Book,
   MessageSquare,
   Info,
@@ -22,11 +22,15 @@ import {
   Plus,
   Play,
   Music,
-  Mic2, // Changed from MicrophoneStage which doesn't exist
+  Mic2,
   Undo,
   Forward,
   Star,
   User,
+  Headphones,
+  Monitor,
+  Telescope,
+  MonitorPlay
 } from 'lucide-react';
 
 // Map of icon names to Lucide React components
@@ -58,6 +62,11 @@ export const IconMap: { [key: string]: any } = {
   'forward': Forward,
   'star': Star,
   'user': User,
+  // Module specific icons
+  'headphones': Headphones,
+  'monitor': Monitor,
+  'telescope': Telescope,
+  'monitor-play': MonitorPlay,
 };
 
 // XP calculation helpers

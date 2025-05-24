@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { LucideIcon, ArrowRight } from 'lucide-react';
+import { LucideIcon, ArrowRight, BookOpen } from 'lucide-react';
 import { IconMap } from '@/lib/gamification';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -21,7 +21,7 @@ export default function ModuleCard({
   path,
   unreadNotifications = 0
 }: ModuleCardProps) {
-  const Icon = IconMap[icon];
+  const Icon = IconMap[icon] || IconMap['book-open'];
   
   // Map color strings to gradient classes and glow effects
   const gradientMap: Record<string, {gradient: string, glow: string}> = {
