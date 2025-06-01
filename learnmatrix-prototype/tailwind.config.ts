@@ -7,7 +7,9 @@ export default {
     "./client/index.html", 
     "./client/src/**/*.{js,jsx,ts,tsx}",
     "./learnmatrix-prototype/client/index.html",
-    "./learnmatrix-prototype/client/src/**/*.{js,jsx,ts,tsx}"
+    "./learnmatrix-prototype/client/src/**/*.{js,jsx,ts,tsx}",
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}"
   ],
   theme: {
     extend: {
