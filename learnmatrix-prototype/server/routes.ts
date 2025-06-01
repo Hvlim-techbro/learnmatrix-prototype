@@ -430,13 +430,9 @@ Host B: And I'll throw in some fun examples to make these concepts more relatabl
         }
         
       } catch (error: any) {
-      console.error('Error generating audio lesson:', error);
-  }try {
-    // Your code that may throw an error
-} catch (error) {
-    console.error('An error occurred:', error);
-}
-      // Provide a detailed error message based on the type of error
+        console.error('Error generating audio lesson:', error);
+        
+        // Provide a detailed error message based on the type of error
       const errorMessage = typeof error === 'object' && error?.message ? error.message : 'Internal server error';
       const statusCode = typeof error === 'object' && error?.status ? error.status : 500;
       
