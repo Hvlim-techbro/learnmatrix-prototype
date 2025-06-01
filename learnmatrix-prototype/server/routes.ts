@@ -13,11 +13,11 @@ import {
   insertBadgeSchema 
 } from "@shared/schema";
 
-// Initialize OpenAI clients with API keys from environment
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Initialize OpenAI clients with API keys from environment (with fallbacks)
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 
 // Separate client for TTS operations
-const ttsOpenai = new OpenAI({ apiKey: process.env.TTS_OPENAI_API_KEY });
+const ttsOpenai = process.env.TTS_OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.TTS_OPENAI_API_KEY }) : null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -52,79 +52,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             console.log('Audio file saved, starting transcription...');
             
-            // Step 1: Transcribe audio with Whisper
-            const transcription = await openai.audio.transcriptions.create({
-              file: fs.createReadStream(tempFilePath),
-              model: 'whisper-1',
-            });
+            let transcriptionText = '';
+            let responseText = '';
             
-            console.log('Transcription successful:', transcription.text);
-            
-            // Clean up temporary audio file
-            fs.unlinkSync(tempFilePath);
-            
-            // Send the transcription back to the client
-            if (ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({
-                type: 'transcription',
-                transcript: transcription.text
-              }));
-            }
-            
-            // Step 2: Get AI response from GPT-4o with host personas
-            const moduleName = "Neural Networks and Deep Learning";
-            
-            const gptResponse = await openai.chat.completions.create({
-              model: "gpt-4o",
-              messages: [
-                {
-                  role: "system",
-                  content: "You are two co-hosts on an educational podcast discussing a topic in depth. Host A is clear and concise; Host B is friendly and humorous. Always refer back to each other by name ('Host A: …', 'Host B: …')."
-                },
-                {
-                  role: "user",
-                  content: `Module: ${moduleName}\nLearner asked: ${transcription.text}\nContinue the discussion.`
-                }
-              ],
-              max_tokens: 300
-            });
-            
-            const responseText = gptResponse.choices[0].message.content || '';
-            console.log('AI response:', responseText);
-            
-            // Step 3: Convert response to speech with OpenAI TTS
-            try {
-              // Ensure we have valid text for TTS
-              const ttsInput = responseText.trim() || 'I apologize, but I need more information to provide a helpful response.';
+            if (!openai) {
+              console.log('OpenAI API key not available, using mock transcription');
+              transcriptionText = 'Mock transcription: Can you explain neural networks?';
               
-              // Use the dedicated TTS OpenAI client
-              const audioResponse = await ttsOpenai.audio.speech.create({
-                model: "tts-1",
-                voice: "alloy",
-                input: ttsInput,
-              });
+              // Clean up temporary audio file
+              fs.unlinkSync(tempFilePath);
               
-              // Get audio data as buffer
-              const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
-              
-              // Save to a temporary file
-              const tempAudioPath = path.join(process.cwd(), `temp_response_${Date.now()}.mp3`);
-              fs.writeFileSync(tempAudioPath, audioBuffer);
-              
-              // Convert to base64 for sending over WebSocket
-              const audioBase64 = fs.readFileSync(tempAudioPath).toString('base64');
-              
-              // Send both text and audio data back to the client
+              // Send the mock transcription back to the client
               if (ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({
-                  type: 'ai_response',
-                  response: responseText,
-                  audioData: audioBase64
+                  type: 'transcription',
+                  transcript: transcriptionText
                 }));
               }
               
-              // Clean up the temporary file
-              fs.unlinkSync(tempAudioPath);
+              // Step 2: Generate mock AI response
+              const moduleName = "Neural Networks and Deep Learning";
+              responseText = `Host A: Great question about neural networks! Neural networks are computational models inspired by the human brain.
+
+Host B: That's right, Host A! Think of them like a network of interconnected nodes, similar to how neurons connect in our brains. They're fantastic for pattern recognition and learning from data.
+
+Host A: Exactly, Host B. Each connection has a weight that gets adjusted during training, allowing the network to learn and make predictions on new data.`;
+              
+            } else {
+              // Step 1: Transcribe audio with Whisper
+              const transcription = await openai.audio.transcriptions.create({
+                file: fs.createReadStream(tempFilePath),
+                model: 'whisper-1',
+              });
+              
+              transcriptionText = transcription.text;
+              console.log('Transcription successful:', transcriptionText);
+              
+              // Clean up temporary audio file
+              fs.unlinkSync(tempFilePath);
+              
+              // Send the transcription back to the client
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                  type: 'transcription',
+                  transcript: transcriptionText
+                }));
+              }
+              
+              // Step 2: Get AI response from GPT-4o with host personas
+              const moduleName = "Neural Networks and Deep Learning";
+              
+              const gptResponse = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                  {
+                    role: "system",
+                    content: "You are two co-hosts on an educational podcast discussing a topic in depth. Host A is clear and concise; Host B is friendly and humorous. Always refer back to each other by name ('Host A: …', 'Host B: …')."
+                  },
+                  {
+                    role: "user",
+                    content: `Module: ${moduleName}\nLearner asked: ${transcriptionText}\nContinue the discussion.`
+                  }
+                ],
+                max_tokens: 300
+              });
+              
+              responseText = gptResponse.choices[0].message.content || '';
+            }
+            
+            console.log('AI response:', responseText);
+            
+            // Step 3: Convert response to speech with OpenAI TTS (if available)
+            try {
+              if (!ttsOpenai) {
+                console.log('TTS OpenAI API key not available, sending text-only response');
+                // Send text-only response
+                if (ws.readyState === WebSocket.OPEN) {
+                  ws.send(JSON.stringify({
+                    type: 'ai_response',
+                    response: responseText
+                  }));
+                }
+              } else {
+                // Ensure we have valid text for TTS
+                const ttsInput = responseText.trim() || 'I apologize, but I need more information to provide a helpful response.';
+                
+                // Use the dedicated TTS OpenAI client
+                const audioResponse = await ttsOpenai.audio.speech.create({
+                  model: "tts-1",
+                  voice: "alloy",
+                  input: ttsInput,
+                });
+                
+                // Get audio data as buffer
+                const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
+                
+                // Save to a temporary file
+                const tempAudioPath = path.join(process.cwd(), `temp_response_${Date.now()}.mp3`);
+                fs.writeFileSync(tempAudioPath, audioBuffer);
+                
+                // Convert to base64 for sending over WebSocket
+                const audioBase64 = fs.readFileSync(tempAudioPath).toString('base64');
+                
+                // Send both text and audio data back to the client
+                if (ws.readyState === WebSocket.OPEN) {
+                  ws.send(JSON.stringify({
+                    type: 'ai_response',
+                    response: responseText,
+                    audioData: audioBase64
+                  }));
+                }
+                
+                // Clean up the temporary file
+                fs.unlinkSync(tempAudioPath);
+              }
               
             } catch (ttsError) {
               console.error('Error generating TTS:', ttsError);
@@ -229,33 +270,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
         transcript: null
       };
       
-      try {
-        // Generate content using GPT-4o
-        const gptResponse = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "system",
-              content: "You are two co-hosts on an educational podcast discussing a topic in depth. Host A is clear, concise, and provides factual explanations; Host B is friendly, humorous, and adds relatable examples. Always refer back to each other by name ('Host A: …', 'Host B: …')."
-            },
-            {
-              role: "user",
-              content: `Module Topic: ${topic}\nCreate a 2-3 minute dialogue as Host A and Host B explaining this topic in an engaging and educational manner. Start by introducing the topic.`
-            }
-          ],
-          max_tokens: 800,
-          temperature: 0.7
-        });
+      let responseText = '';
+      
+      if (!openai) {
+        console.log('OpenAI API key not available, using mock content');
+        responseText = `Host A: Welcome to our educational podcast! Today, we'll be discussing ${topic}.
+
+Host B: That's right, Host A! This is a fascinating subject that many people are curious about.
+
+Host A: For starters, let's define what ${topic} means in simple terms. It's a subject that involves understanding the world around us.
+
+Host B: Exactly! And you know what I find interesting? How this topic connects to our everyday lives in ways we might not even realize.
+
+Host A: Let's break down some key concepts that our listeners should know about ${topic}.
+
+Host B: And I'll throw in some fun examples to make these concepts more relatable!
+
+Host A: The fundamentals of ${topic} can be quite complex, but when we break them down step by step, they become much more manageable.
+
+Host B: That's the beauty of learning - taking something that seems overwhelming and making it digestible!`;
         
-        // Extract the content from the response
-        const responseText = gptResponse.choices[0].message.content || 'I apologize, but I could not generate content for this topic.';
-        console.log('Generated text content successfully');
-        
-        // Update mock data with the transcript
-        mockLesson.transcript = responseText;
-        
-        // Generate speech audio from the text using TTS API
+        console.log('Generated mock content successfully');
+      } else {
         try {
+          // Generate content using GPT-4o
+          const gptResponse = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "system",
+                content: "You are two co-hosts on an educational podcast discussing a topic in depth. Host A is clear, concise, and provides factual explanations; Host B is friendly, humorous, and adds relatable examples. Always refer back to each other by name ('Host A: …', 'Host B: …')."
+              },
+              {
+                role: "user",
+                content: `Module Topic: ${topic}\nCreate a 2-3 minute dialogue as Host A and Host B explaining this topic in an engaging and educational manner. Start by introducing the topic.`
+              }
+            ],
+            max_tokens: 800,
+            temperature: 0.7
+          });
+          
+          // Extract the content from the response
+          responseText = gptResponse.choices[0].message.content || 'I apologize, but I could not generate content for this topic.';
+          console.log('Generated text content successfully');
+        } catch (gptError: any) {
+          console.error('Error with GPT response:', gptError);
+          // Use fallback content
+          responseText = `Host A: Welcome to our educational podcast! Today, we'll be discussing ${topic}.
+
+Host B: That's right! This is a fascinating subject that many people are curious about.
+
+Host A: For starters, let's define what ${topic} means in simple terms. It's a subject that involves understanding the world around us.
+
+Host B: Exactly! And you know what I find interesting? How this topic connects to our everyday lives in ways we might not even realize.
+
+Host A: Let's break down some key concepts that our listeners should know about ${topic}.
+
+Host B: And I'll throw in some fun examples to make these concepts more relatable!`;
+        }
+      }
+      
+      // Update mock data with the transcript
+      mockLesson.transcript = responseText;
+        
+        // Generate speech audio from the text using TTS API (if available)
+        try {
+          if (!ttsOpenai) {
+            console.log('TTS OpenAI API key not available, returning text-only lesson');
+            return res.json({
+              title: topic,
+              transcript: responseText,
+              audioUrl: null,
+              error: "TTS not available without API key"
+            });
+          }
+          
           const audioResponse = await ttsOpenai.audio.speech.create({
             model: "tts-1",
             voice: "alloy",
