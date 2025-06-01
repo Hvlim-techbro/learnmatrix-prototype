@@ -396,14 +396,14 @@ Host B: And I'll throw in some fun examples to make these concepts more relatabl
         }
         
       } catch (gptError: any) {
-        console.error('Error with GPT response:', gptError);
-        
-        // Provide fallback for rate limiting errors
-        if (typeof gptError === 'object' && gptError?.message && gptError.message.includes('quota')) {
-          console.log('GPT quota exceeded, using fallback content');
+          console.error('Error with GPT response:', gptError);
           
-          // Define a fallback lesson script on the topic
-          const fallbackText = `Host A: Welcome to our educational podcast! Today, we'll be discussing ${topic}.
+          // Provide fallback for rate limiting errors
+          if (typeof gptError === 'object' && gptError?.message && gptError.message.includes('quota')) {
+            console.log('GPT quota exceeded, using fallback content');
+            
+            // Define a fallback lesson script on the topic
+            const fallbackText = `Host A: Welcome to our educational podcast! Today, we'll be discussing ${topic}.
 
 Host B: That's right! This is a fascinating subject that many people are curious about.
 
@@ -414,22 +414,22 @@ Host B: Exactly! And you know what I find interesting? How this topic connects t
 Host A: Let's break down some key concepts that our listeners should know about ${topic}.
 
 Host B: And I'll throw in some fun examples to make these concepts more relatable!`;
-          
-          mockLesson.transcript = fallbackText;
-          
-          return res.json({
-            title: topic,
-            transcript: fallbackText,
-            audioUrl: null,
-            error: "API quota exceeded, text-only fallback provided"
-          });
-        } else {
-          // For other errors, rethrow
-          throw gptError;
+            
+            mockLesson.transcript = fallbackText;
+            
+            return res.json({
+              title: topic,
+              transcript: fallbackText,
+              audioUrl: null,
+              error: "API quota exceeded, text-only fallback provided"
+            });
+          } else {
+            // For other errors, rethrow
+            throw gptError;
+          }
         }
-      }
-      
-    } catch (error: any) {
+        
+      } catch (error: any) {
       console.error('Error generating audio lesson:', error);
       
       // Provide a detailed error message based on the type of error
