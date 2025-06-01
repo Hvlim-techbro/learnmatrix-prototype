@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 export default function TabBar() {
   const [location] = useLocation();
-  
+
   const tabs = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'Audio', path: '/audio-tutor', icon: Mic },
@@ -19,7 +19,7 @@ export default function TabBar() {
       <div className="grid grid-cols-5 h-16">
         {tabs.map((tab, index) => {
           const isActive = tab.path === location;
-          
+
           return (
             <Link 
               key={tab.name} 
@@ -47,7 +47,7 @@ export default function TabBar() {
           );
         })}
       </div>
-      
+
       {/* Center Button - Profile Access */}
       <motion.div 
         className="absolute -top-6 left-1/2 transform -translate-x-1/2"
